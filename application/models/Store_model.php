@@ -1,14 +1,14 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Varian_model extends MY_Model
+class Store_model extends MY_Model
 {
-  protected $table = "varian";
+  protected $table = "store";
 
   function __construct()
   {
     parent::__construct($this->table);
-    parent::set_join_key('varian_id');
+    parent::set_join_key('store_id');
   }
 
   /**
@@ -70,7 +70,7 @@ class Varian_model extends MY_Model
   {
     //foreign
     //delete_foreign( $data_param. $models[]  )
-    if (!$this->delete_foreign($data_param, ['item_model', 'hold_order_model'])) {
+    if (!$this->delete_foreign($data_param, ['menu_model'])) {
       $this->set_error("gagal"); //('group_delete_unsuccessful');
       return FALSE;
     }
@@ -92,13 +92,13 @@ class Varian_model extends MY_Model
   }
 
   /**
-   * varian
+   * store
    *
-   * @param int|array|null $id = id_varians
+   * @param int|array|null $id = id_stores
    * @return static
    * @author madukubah
    */
-  public function varian($id = NULL)
+  public function store($id = NULL)
   {
     if (isset($id)) {
       $this->where($this->table . '.id', $id);
@@ -107,18 +107,31 @@ class Varian_model extends MY_Model
     $this->limit(1);
     $this->order_by($this->table . '.id', 'desc');
 
-    $this->varians();
+    $this->stores();
+
+    return $this;
+  }
+  public function store_by_user_id($id = NULL)
+  {
+    if (isset($id)) {
+      $this->where($this->table . '.user_id', $id);
+    }
+
+    $this->limit(1);
+    $this->order_by($this->table . '.id', 'desc');
+
+    $this->stores();
 
     return $this;
   }
   // /**
-  //  * varians
+  //  * stores
   //  *
   //  *
   //  * @return static
   //  * @author madukubah
   //  */
-  // public function varians(  )
+  // public function stores(  )
   // {
 
   //     $this->order_by($this->table.'.id', 'asc');
@@ -126,40 +139,22 @@ class Varian_model extends MY_Model
   // }
 
   /**
-   * varians
+   * stores
    *
    *
    * @return static
    * @author madukubah
    */
-  public function varians($start = 0, $limit = NULL, $id = null)
+  public function stores($start = 0, $limit = NULL)
   {
-    $this->select($this->table . '.*');
-    $this->select('product.name');
-    $this->select('varian');
+    $this->select('*');
+    $this->select('image as image_old');
+    $this->select(" CONCAT( '" . base_url() . 'uploads/store/' . "' , " . $this->table . ".image )  as image");
     if (isset($limit)) {
       $this->limit($limit);
     }
-    $this->join(
-      'product',
-      'product.id = varian.product_id',
-      'inner'
-    );
     $this->offset($start);
     $this->order_by($this->table . '.id', 'asc');
     return $this->fetch_data();
-  }
-  public function varian_by_product_id($id = null)
-  {
-    if (isset($id)) {
-      $this->where($this->table . '.product_id', $id);
-    }
-
-    // $this->limit(1);
-    $this->order_by($this->table . '.id', 'desc');
-
-    $this->varians();
-
-    return $this;
   }
 }

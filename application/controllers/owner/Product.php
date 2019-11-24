@@ -31,7 +31,7 @@ class Product extends Owner_Controller
 		#################################################################3
 		$table = $this->services->get_table_config($this->current_page);
 		$table["rows"] = $this->product_model->products($pagination['start_record'], $pagination['limit_per_page'])->result();
-		$table = $this->load->view('templates/tables/plain_table', $table, true);
+		$table = $this->load->view('templates/tables/plain_table_image', $table, true);
 		$this->data["contents"] = $table;
 		$add_menu = array(
 			"name" => "Tambah Produk",
@@ -42,7 +42,7 @@ class Product extends Owner_Controller
 			'data' => NULL
 		);
 
-		$add_menu = $this->load->view('templates/actions/modal_form', $add_menu, true);
+		$add_menu = $this->load->view('templates/actions/modal_form_multipart', $add_menu, true);
 
 		$this->data["header_button"] =  $add_menu;
 		// return;
@@ -70,12 +70,18 @@ class Product extends Owner_Controller
 			$data['price'] = $this->input->post('price');
 			$data['qty'] = $this->input->post('qty');
 
-			// $id = $this->product_model->create($data);
-			// $data = [
-			// 	'product_id' => $id,
-			// 	'taste' => $this->input->post('taste')
-			// ];
+			$this->load->library('upload'); // Load librari upload
+			$config = $this->services->get_photo_upload_config($data['name']);
 
+			$this->upload->initialize($config);
+			// echo var_dump($data); return;
+			if ($_FILES['image']['name'] != "")
+				if ($this->upload->do_upload("image")) {
+					$data['image'] = $this->upload->data()['file_name'];
+				} else {
+					$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->upload->display_errors()));
+					redirect(site_url($this->current_page));
+				}
 			if ($this->product_model->create($data)) {
 				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->product_model->messages()));
 			} else {
@@ -101,10 +107,22 @@ class Product extends Owner_Controller
 			$data['price'] = $this->input->post('price');
 			$data['qty'] = $this->input->post('qty');
 
-			$data_param['id'] = $this->input->post('id');
+			$this->load->library('upload'); // Load librari upload
+			$config = $this->services->get_photo_upload_config($data['name']);
 
-			// $data_taste['taste'] = $this->input->post('taste');
-			// $data_param_taste['']
+			$this->upload->initialize($config);
+			// echo var_dump( $_FILES ); return;
+			if ($_FILES['image']['name'] != "") //if image not null
+				if ($this->upload->do_upload("image")) {
+					$data['image'] = $this->upload->data()["file_name"];
+					if ($this->input->post('image_old') != 'default.jpg')
+						if (!@unlink($config['upload_path'] . $this->input->post('image_old')));
+				} else {
+					$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->upload->display_errors()));
+					redirect(site_url($this->current_page));
+				}
+
+			$data_param['id'] = $this->input->post('id');
 			if ($this->product_model->update($data, $data_param)) {
 				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->product_model->messages()));
 			} else {
@@ -122,8 +140,12 @@ class Product extends Owner_Controller
 	{
 		if (!($_POST)) redirect(site_url($this->current_page));
 
+		$this->load->library('upload'); // Load librari upload
+		$config = $this->services->get_photo_upload_config($data['name']);
+
 		$data_param['id'] 	= $this->input->post('id');
 		if ($this->product_model->delete($data_param)) {
+			if (!@unlink($config['upload_path'] . $this->input->post('image'))) return;
 			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->product_model->messages()));
 		} else {
 			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->product_model->errors()));

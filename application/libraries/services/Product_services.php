@@ -11,6 +11,21 @@ class Product_services
   {
     return get_instance()->$var;
   }
+  public function get_photo_upload_config($name = "")
+  {
+    // $filename = $name . "_" . time();
+    $filename = $name . "_" . time();
+    $upload_path = 'uploads/product/';
+
+    $config['upload_path'] = './' . $upload_path;
+    $config['image_path'] = base_url() . $upload_path;
+    $config['allowed_types'] = "gif|jpg|png|jpeg";
+    $config['overwrite'] = "true";
+    // $config['max_size'] = "2048";
+    $config['file_name'] = '' . $filename;
+
+    return $config;
+  }
   public function select_category()
   {
     $this->load->model('category_model');
@@ -27,15 +42,25 @@ class Product_services
     $table["header"] = array(
       'name' => 'Nama',
       'category_name' => 'Jenis',
-      // 'taste' => 'Varian Rasa',
+      // 'varian' => 'Varian Rasa',
       'price' => 'Harga',
       'qty' => 'Stok',
+      '_image' => 'Foto Produk',
     );
     $table["number"] = $start_number;
     $table["action"] = array(
       array(
+        "name" => 'Tambah Varian',
+        "type" => "link",
+        "url" => site_url("owner/varian/index/"),
+        "button_color" => "primary",
+        "param" => "id",
+        "title" => "Group",
+        "data_name" => "name",
+      ),
+      array(
         "name" => 'Edit',
-        "type" => "modal_form",
+        "type" => "modal_form_multipart",
         "modal_id" => "edit_",
         "url" => site_url($_page . "edit/"),
         "button_color" => "primary",
@@ -44,6 +69,10 @@ class Product_services
           "id" => array(
             'type' => 'hidden',
             'label' => "id",
+          ),
+          "image_old" => array(
+            'type' => 'hidden',
+            'label' => "Foto Produk",
           ),
           "name" => array(
             'type' => 'text',
@@ -62,7 +91,11 @@ class Product_services
             'type' => 'number',
             'label' => "Stok",
           ),
-          // "taste" => array(
+          "image" => array(
+            'type' => 'file',
+            'label' => "Foto Produk",
+          ),
+          // "varian" => array(
           //   'type' => 'text',
           //   'label' => "Varian Rasa",
           //   'value' => "",
@@ -82,6 +115,10 @@ class Product_services
           "id" => array(
             'type' => 'hidden',
             'label' => "id",
+          ),
+          "image" => array(
+            'type' => 'hidden',
+            'label' => "foto",
           ),
         ),
         "title" => "Group",
@@ -114,8 +151,8 @@ class Product_services
         'rules' =>  'trim|required',
       ),
       // array(
-      //   'field' => 'taste',
-      //   'label' => 'taste',
+      //   'field' => 'varian',
+      //   'label' => 'varian',
       //   'rules' =>  'trim|required',
       // ),
     );
@@ -146,7 +183,11 @@ class Product_services
         'label' => "Stok",
         'value' => "",
       ),
-      // "taste" => array(
+      "image" => array(
+        'type' => 'file',
+        'label' => "Foto Produk",
+      ),
+      // "varian" => array(
       //   'type' => 'text',
       //   'label' => "Varian Rasa",
       //   'value' => "",

@@ -25,8 +25,8 @@ class Varian_services
   {
     $select = $this->select_product();
     $table["header"] = array(
-      'product_name' => 'Nama Produk',
-      'taste' => 'Varian Produk',
+      'name' => 'Nama Produk',
+      'varian' => 'Varian Produk',
     );
     $table["number"] = $start_number;
     $table["action"] = array(
@@ -47,7 +47,7 @@ class Varian_services
             'label' => "Produk",
             'options' => $select,
           ),
-          "taste" => array(
+          "varian" => array(
             'type' => 'text',
             'label' => "Varian Produk",
           ),
@@ -78,29 +78,30 @@ class Varian_services
   {
     $config = array(
       array(
-        'field' => 'name',
-        'label' => 'name',
+        'field' => 'product_id',
+        'label' => 'product_id',
         'rules' =>  'trim|required',
       ),
       array(
-        'field' => 'description',
-        'label' => 'description',
+        'field' => 'varian',
+        'label' => 'varian',
         'rules' =>  'trim|required',
       ),
     );
 
     return $config;
   }
-  public function get_form_data()
+  public function get_form_data($id = null)
   {
     $select = $this->select_product();
     $form_data = array(
       "product_id" => array(
-        'type' => 'select',
+        'type' => 'hidden',
         'label' => "Produk",
-        'options' => $select,
+        'value' => $id,
+        // 'options' => $select,
       ),
-      "taste" => array(
+      "varian" => array(
         'type' => 'text',
         'label' => "Varian Produk",
         'value' => "",

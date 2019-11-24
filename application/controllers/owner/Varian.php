@@ -17,21 +17,10 @@ class Varian extends Owner_Controller
 			'product_model',
 		));
 	}
-	public function index()
+	public function index($id = null)
 	{
-		$page = ($this->uri->segment(4)) ? ($this->uri->segment(4) -  1) : 0;
-		// echo $page; return;
-		//pagination parameter
-		$pagination['base_url'] = base_url($this->current_page) . '/index';
-		$pagination['total_records'] = $this->varian_model->record_count();
-		$pagination['limit_per_page'] = 10;
-		$pagination['start_record'] = $page * $pagination['limit_per_page'];
-		$pagination['uri_segment'] = 4;
-		//set pagination
-		if ($pagination['total_records'] > 0) $this->data['pagination_links'] = $this->setPagination($pagination);
-		#################################################################3
 		$table = $this->services->get_table_config($this->current_page);
-		$table["rows"] = $this->varian_model->varians($pagination['start_record'], $pagination['limit_per_page'])->result();
+		$table["rows"] = $this->varian_model->varian_by_product_id($id)->result();
 		$table = $this->load->view('templates/tables/plain_table', $table, true);
 		$this->data["contents"] = $table;
 		$add_menu = array(
@@ -39,13 +28,21 @@ class Varian extends Owner_Controller
 			"modal_id" => "add_varian_",
 			"button_color" => "primary",
 			"url" => site_url($this->current_page . "add/"),
-			"form_data" => $this->services->get_form_data(),
+			"form_data" => $this->services->get_form_data($id),
 			'data' => NULL
 		);
 
 		$add_menu = $this->load->view('templates/actions/modal_form', $add_menu, true);
-
-		$this->data["header_button"] =  $add_menu;
+		$btn_back = array(
+			"name" => 'Kembali',
+			"type" => "link",
+			"url" => site_url("owner/product"),
+			"button_color" => "primary",
+			"param" => "id",
+			"title" => "Group",
+			"data_name" => "name",
+		);
+		$this->data["header_button"] =  $add_menu . ' ' . $btn_back;
 		// return;
 		#################################################################3
 		$alert = $this->session->flashdata('alert');
@@ -66,8 +63,8 @@ class Varian extends Owner_Controller
 		// echo var_dump( $data );return;
 		$this->form_validation->set_rules($this->services->validation_config());
 		if ($this->form_validation->run() === TRUE) {
-			$data['name'] = $this->input->post('name');
-			$data['description'] = $this->input->post('description');
+			$data['product_id'] = $this->input->post('product_id');
+			$data['varian'] = $this->input->post('varian');
 
 			if ($this->varian_model->create($data)) {
 				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->varian_model->messages()));
@@ -79,7 +76,7 @@ class Varian extends Owner_Controller
 			if (validation_errors() || $this->varian_model->errors()) $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->data['message']));
 		}
 
-		redirect(site_url($this->current_page));
+		redirect(site_url($this->current_page . 'index/' . $data['product_id']));
 	}
 
 	public function edit()
@@ -89,8 +86,8 @@ class Varian extends Owner_Controller
 		// echo var_dump( $data );return;
 		$this->form_validation->set_rules($this->services->validation_config());
 		if ($this->form_validation->run() === TRUE) {
-			$data['name'] = $this->input->post('name');
-			$data['description'] = $this->input->post('description');
+			$data['product_id'] = $this->input->post('product_id');
+			$data['varian'] = $this->input->post('varian');
 
 			$data_param['id'] = $this->input->post('id');
 

@@ -70,7 +70,7 @@ class Product_model extends MY_Model
   {
     //foreign
     //delete_foreign( $data_param. $models[]  )
-    if (!$this->delete_foreign($data_param, ['taste_model', 'item_model', 'hold_order_model'])) {
+    if (!$this->delete_foreign($data_param, ['varian_model', 'item_model', 'hold_order_model'])) {
       $this->set_error("gagal"); //('group_delete_unsuccessful');
       return FALSE;
     }
@@ -136,7 +136,11 @@ class Product_model extends MY_Model
   {
     $this->select($this->table . '.*');
     $this->select('category.name AS category_name');
-    // $this->select('taste');
+    $this->select(" CONCAT( '" . base_url() . 'uploads/product/' . "' , " . $this->table . ".image )  as _image");
+    $this->select($this->table . '.image as image_old');
+
+
+    // $this->select('varian');
     if (isset($limit)) {
       $this->limit($limit);
     }
@@ -146,13 +150,13 @@ class Product_model extends MY_Model
       'inner'
     );
     // $this->join(
-    //   'taste',
-    //   'taste.product_id = product.id',
+    //   'varian',
+    //   'varian.product_id = product.id',
     //   'inner'
     // );
     $this->offset($start);
     $this->order_by($this->table . '.id', 'asc');
-    // $this->order_by('taste.product_id', 'asc');
+    // $this->order_by('varian.product_id', 'asc');
     return $this->fetch_data();
   }
 }

@@ -1,26 +1,20 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
-class Category extends Owner_Controller
+class Product extends Customer_Controller
 {
 	private $services = null;
 	private $name = null;
-	private $parent_page = 'owner';
-	private $current_page = 'owner/category/';
+	private $parent_page = 'product';
+	private $current_page = 'product/';
 
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->library('services/Category_services');
-		$this->services = new Category_services;
+		$this->load->library('services/Group_services');
+		$this->services = new Group_services;
 		$this->load->model(array(
-			'category_model',
-			'store_model',
+			'group_model',
 		));
-		$user_id = $this->ion_auth->get_user_id();
-		if (!$this->store_model->store_by_user_id($user_id)->row()) {
-			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, 'Silahkan Mengisi Data Toko Terlebih Dahulu'));
-			redirect(site_url('/owner/store'));
-		}
 	}
 	public function index()
 	{
@@ -28,7 +22,7 @@ class Category extends Owner_Controller
 		// echo $page; return;
 		//pagination parameter
 		$pagination['base_url'] = base_url($this->current_page) . '/index';
-		$pagination['total_records'] = $this->category_model->record_count();
+		$pagination['total_records'] = $this->group_model->record_count();
 		$pagination['limit_per_page'] = 10;
 		$pagination['start_record'] = $page * $pagination['limit_per_page'];
 		$pagination['uri_segment'] = 4;
@@ -36,18 +30,18 @@ class Category extends Owner_Controller
 		if ($pagination['total_records'] > 0) $this->data['pagination_links'] = $this->setPagination($pagination);
 		#################################################################3
 		$table = $this->services->get_table_config($this->current_page);
-		$table["rows"] = $this->category_model->categories($pagination['start_record'], $pagination['limit_per_page'])->result();
+		$table["rows"] = $this->group_model->groups($pagination['start_record'], $pagination['limit_per_page'])->result();
 		$table = $this->load->view('templates/tables/plain_table', $table, true);
-		$this->data["contents"] = $table;
+		// $this->data["contents"] = $table;
 		$add_menu = array(
-			"name" => "Tambah Kategori",
-			"modal_id" => "add_category_",
+			"name" => "Tambah Group",
+			"modal_id" => "add_group_",
 			"button_color" => "primary",
 			"url" => site_url($this->current_page . "add/"),
 			"form_data" => array(
 				"name" => array(
 					'type' => 'text',
-					'label' => "Kategori Menu",
+					'label' => "Nama Group",
 					'value' => "",
 				),
 				"description" => array(
@@ -71,7 +65,7 @@ class Category extends Owner_Controller
 		$this->data["block_header"] = "Group";
 		$this->data["header"] = "Group";
 		$this->data["sub_header"] = 'Klik Tombol Action Untuk Aksi Lebih Lanjut';
-		$this->render("templates/contents/plain_content");
+		$this->render("templates/user_contents/plain_content");
 	}
 
 
@@ -85,14 +79,14 @@ class Category extends Owner_Controller
 			$data['name'] = $this->input->post('name');
 			$data['description'] = $this->input->post('description');
 
-			if ($this->category_model->create($data)) {
-				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->category_model->messages()));
+			if ($this->group_model->create($data)) {
+				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->group_model->messages()));
 			} else {
-				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->category_model->errors()));
+				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->group_model->errors()));
 			}
 		} else {
-			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->m_account->errors() ? $this->category_model->errors() : $this->session->flashdata('message')));
-			if (validation_errors() || $this->category_model->errors()) $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->data['message']));
+			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->m_account->errors() ? $this->group_model->errors() : $this->session->flashdata('message')));
+			if (validation_errors() || $this->group_model->errors()) $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->data['message']));
 		}
 
 		redirect(site_url($this->current_page));
@@ -110,14 +104,14 @@ class Category extends Owner_Controller
 
 			$data_param['id'] = $this->input->post('id');
 
-			if ($this->category_model->update($data, $data_param)) {
-				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->category_model->messages()));
+			if ($this->group_model->update($data, $data_param)) {
+				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->group_model->messages()));
 			} else {
-				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->category_model->errors()));
+				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->group_model->errors()));
 			}
 		} else {
-			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->m_account->errors() ? $this->category_model->errors() : $this->session->flashdata('message')));
-			if (validation_errors() || $this->category_model->errors()) $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->data['message']));
+			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->m_account->errors() ? $this->group_model->errors() : $this->session->flashdata('message')));
+			if (validation_errors() || $this->group_model->errors()) $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->data['message']));
 		}
 
 		redirect(site_url($this->current_page));
@@ -128,10 +122,10 @@ class Category extends Owner_Controller
 		if (!($_POST)) redirect(site_url($this->current_page));
 
 		$data_param['id'] 	= $this->input->post('id');
-		if ($this->category_model->delete($data_param)) {
-			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->category_model->messages()));
+		if ($this->group_model->delete($data_param)) {
+			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->group_model->messages()));
 		} else {
-			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->category_model->errors()));
+			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->group_model->errors()));
 		}
 		redirect(site_url($this->current_page));
 	}

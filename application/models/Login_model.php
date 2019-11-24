@@ -1,14 +1,14 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Varian_model extends MY_Model
+class Login_model extends MY_Model
 {
-  protected $table = "varian";
+  protected $table = "login";
 
   function __construct()
   {
     parent::__construct($this->table);
-    parent::set_join_key('varian_id');
+    parent::set_join_key('menu_id');
   }
 
   /**
@@ -70,10 +70,10 @@ class Varian_model extends MY_Model
   {
     //foreign
     //delete_foreign( $data_param. $models[]  )
-    if (!$this->delete_foreign($data_param, ['item_model', 'hold_order_model'])) {
-      $this->set_error("gagal"); //('group_delete_unsuccessful');
-      return FALSE;
-    }
+    // if (!$this->delete_foreign($data_param, ['menu_model'])) {
+    //   $this->set_error("gagal"); //('group_delete_unsuccessful');
+    //   return FALSE;
+    // }
     //foreign
     $this->db->trans_begin();
 
@@ -92,13 +92,13 @@ class Varian_model extends MY_Model
   }
 
   /**
-   * varian
+   * login
    *
-   * @param int|array|null $id = id_varians
+   * @param int|array|null $id = id_logins
    * @return static
    * @author madukubah
    */
-  public function varian($id = NULL)
+  public function login($id = NULL)
   {
     if (isset($id)) {
       $this->where($this->table . '.id', $id);
@@ -107,18 +107,18 @@ class Varian_model extends MY_Model
     $this->limit(1);
     $this->order_by($this->table . '.id', 'desc');
 
-    $this->varians();
+    $this->logins();
 
     return $this;
   }
   // /**
-  //  * varians
+  //  * logins
   //  *
   //  *
   //  * @return static
   //  * @author madukubah
   //  */
-  // public function varians(  )
+  // public function logins(  )
   // {
 
   //     $this->order_by($this->table.'.id', 'asc');
@@ -126,40 +126,19 @@ class Varian_model extends MY_Model
   // }
 
   /**
-   * varians
+   * logins
    *
    *
    * @return static
    * @author madukubah
    */
-  public function varians($start = 0, $limit = NULL, $id = null)
+  public function logins($start = 0, $limit = NULL)
   {
-    $this->select($this->table . '.*');
-    $this->select('product.name');
-    $this->select('varian');
     if (isset($limit)) {
       $this->limit($limit);
     }
-    $this->join(
-      'product',
-      'product.id = varian.product_id',
-      'inner'
-    );
     $this->offset($start);
     $this->order_by($this->table . '.id', 'asc');
     return $this->fetch_data();
-  }
-  public function varian_by_product_id($id = null)
-  {
-    if (isset($id)) {
-      $this->where($this->table . '.product_id', $id);
-    }
-
-    // $this->limit(1);
-    $this->order_by($this->table . '.id', 'desc');
-
-    $this->varians();
-
-    return $this;
   }
 }
