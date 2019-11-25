@@ -24,6 +24,7 @@ class Category extends Owner_Controller
 	}
 	public function index()
 	{
+		$store_id = $this->ion_auth->store_id();
 		$page = ($this->uri->segment(4)) ? ($this->uri->segment(4) -  1) : 0;
 		// echo $page; return;
 		//pagination parameter
@@ -36,7 +37,7 @@ class Category extends Owner_Controller
 		if ($pagination['total_records'] > 0) $this->data['pagination_links'] = $this->setPagination($pagination);
 		#################################################################3
 		$table = $this->services->get_table_config($this->current_page);
-		$table["rows"] = $this->category_model->categories($pagination['start_record'], $pagination['limit_per_page'])->result();
+		$table["rows"] = $this->category_model->categories($pagination['start_record'], $pagination['limit_per_page'], $store_id)->result();
 		$table = $this->load->view('templates/tables/plain_table', $table, true);
 		$this->data["contents"] = $table;
 		$add_menu = array(
@@ -45,6 +46,11 @@ class Category extends Owner_Controller
 			"button_color" => "primary",
 			"url" => site_url($this->current_page . "add/"),
 			"form_data" => array(
+				"store_id" => array(
+					'type' => 'hidden',
+					'label' => "Store Id",
+					'value' => $store_id,
+				),
 				"name" => array(
 					'type' => 'text',
 					'label' => "Kategori Menu",
@@ -58,7 +64,6 @@ class Category extends Owner_Controller
 			),
 			'data' => NULL
 		);
-
 		$add_menu = $this->load->view('templates/actions/modal_form', $add_menu, true);
 
 		$this->data["header_button"] =  $add_menu;
@@ -68,8 +73,8 @@ class Category extends Owner_Controller
 		$this->data["key"] = $this->input->get('key', FALSE);
 		$this->data["alert"] = (isset($alert)) ? $alert : NULL;
 		$this->data["current_page"] = $this->current_page;
-		$this->data["block_header"] = "Group";
-		$this->data["header"] = "Group";
+		$this->data["block_header"] = "Kategori";
+		$this->data["header"] = "Kategori";
 		$this->data["sub_header"] = 'Klik Tombol Action Untuk Aksi Lebih Lanjut';
 		$this->render("templates/contents/plain_content");
 	}
@@ -84,6 +89,7 @@ class Category extends Owner_Controller
 		if ($this->form_validation->run() === TRUE) {
 			$data['name'] = $this->input->post('name');
 			$data['description'] = $this->input->post('description');
+			$data['store_id'] = $this->input->post('store_id');
 
 			if ($this->category_model->create($data)) {
 				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->category_model->messages()));

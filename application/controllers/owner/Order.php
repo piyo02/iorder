@@ -14,10 +14,12 @@ class Order extends Owner_Controller
 		$this->services = new Order_services;
 		$this->load->model(array(
 			'order_model',
+			'item_model',
 		));
 	}
 	public function index()
 	{
+		$store_id = $this->ion_auth->store_id();
 		$page = ($this->uri->segment(4)) ? ($this->uri->segment(4) -  1) : 0;
 		// echo $page; return;
 		//pagination parameter
@@ -30,32 +32,55 @@ class Order extends Owner_Controller
 		if ($pagination['total_records'] > 0) $this->data['pagination_links'] = $this->setPagination($pagination);
 		#################################################################3
 		$table = $this->services->get_table_config($this->current_page);
-		$table["rows"] = $this->order_model->orders($pagination['start_record'], $pagination['limit_per_page'])->result();
-		$table = $this->load->view('templates/tables/plain_table', $table, true);
+		$table["rows"] = $this->order_model->orders($pagination['start_record'], $pagination['limit_per_page'], $store_id)->result();
+		$table["status"] = ['Pesanan baru', 'Sedang dibuat', 'Sudah diantar', 'Sudah dibayar'];
+		$table = $this->load->view('templates/tables/plain_table_status', $table, true);
 		$this->data["contents"] = $table;
-		$add_menu = array(
-			"name" => "Tambah Group",
-			"modal_id" => "add_group_",
-			"button_color" => "primary",
-			"url" => site_url($this->current_page . "add/"),
+		$form_filter = array(
 			"form_data" => array(
 				"name" => array(
-					'type' => 'text',
-					'label' => "Nama Group",
-					'value' => "",
+					'type' => 'select',
+					'label' => "",
+					'options' => array()
 				),
-				"description" => array(
-					'type' => 'textarea',
-					'label' => "Deskripsi",
-					'value' => "-",
-				),
-			),
-			'data' => NULL
+			)
 		);
 
-		$add_menu = $this->load->view('templates/actions/modal_form', $add_menu, true);
+		$form_filter = $this->load->view('templates/form/plain_form_horizontal', $form_filter, true);
 
-		// $this->data["header_button"] =  $add_menu;
+		// $this->data["header_button"] =  $form_filter;
+		// return;
+		#################################################################3
+		$alert = $this->session->flashdata('alert');
+		$this->data["key"] = $this->input->get('key', FALSE);
+		$this->data["alert"] = (isset($alert)) ? $alert : NULL;
+		$this->data["current_page"] = $this->current_page;
+		$this->data["block_header"] = "Pesanan";
+		$this->data["header"] = "Pesanan";
+		$this->data["sub_header"] = 'Klik Tombol Action Untuk Aksi Lebih Lanjut';
+		$this->render("templates/contents/plain_content");
+	}
+	public function detail_order($order_id)
+	{
+		$table = $this->services->get_table_config_no_action($this->current_page);
+		$table["rows"] = $this->item_model->item_by_order_id($order_id)->result();
+		// var_dump($table["rows"]);
+		// die;
+		$table["status"] = ['Pesanan baru', 'Sedang dibuat', 'Sudah diantar', 'Sudah dibayar'];
+		$table = $this->load->view('templates/tables/plain_table_status', $table, true);
+		$this->data["contents"] = $table;
+		$add_menu = array(
+			"name" => 'Kembali',
+			"type" => "link",
+			"url" => site_url($this->current_page),
+			"button_color" => "primary",
+			"title" => "Group",
+			"data_name" => "name",
+		);
+
+		$add_menu = $this->load->view('templates/actions/link', $add_menu, true);
+
+		$this->data["header_button"] =  $add_menu;
 		// return;
 		#################################################################3
 		$alert = $this->session->flashdata('alert');
@@ -67,7 +92,6 @@ class Order extends Owner_Controller
 		$this->data["sub_header"] = 'Klik Tombol Action Untuk Aksi Lebih Lanjut';
 		$this->render("templates/contents/plain_content");
 	}
-
 
 	public function add()
 	{
@@ -85,7 +109,7 @@ class Order extends Owner_Controller
 				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->order_model->errors()));
 			}
 		} else {
-			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->m_account->errors() ? $this->order_model->errors() : $this->session->flashdata('message')));
+			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->order_model->errors() ? $this->order_model->errors() : $this->session->flashdata('message')));
 			if (validation_errors() || $this->order_model->errors()) $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->data['message']));
 		}
 
@@ -97,10 +121,10 @@ class Order extends Owner_Controller
 		if (!($_POST)) redirect(site_url($this->current_page));
 
 		// echo var_dump( $data );return;
-		$this->form_validation->set_rules($this->services->validation_config());
+		$this->form_validation->set_rules('status', 'Status', 'trim|required');
 		if ($this->form_validation->run() === TRUE) {
-			$data['name'] = $this->input->post('name');
-			$data['description'] = $this->input->post('description');
+			$data['status'] = $this->input->post('status');
+			// $data['description'] = $this->input->post('description');
 
 			$data_param['id'] = $this->input->post('id');
 
@@ -110,7 +134,7 @@ class Order extends Owner_Controller
 				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->order_model->errors()));
 			}
 		} else {
-			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->m_account->errors() ? $this->order_model->errors() : $this->session->flashdata('message')));
+			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->order_model->errors() ? $this->order_model->errors() : $this->session->flashdata('message')));
 			if (validation_errors() || $this->order_model->errors()) $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->data['message']));
 		}
 

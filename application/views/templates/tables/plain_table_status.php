@@ -17,12 +17,6 @@
             foreach ($rows as $ind => $row) :
                 ?>
                 <tr>
-                    <input type='hidden' name='id_<?= $no ?>' id='id_<?= $no ?>' value='<?= $row->id ?>'>
-                    <input type='hidden' name='product_id_<?= $no ?>' id='product_id_<?= $no ?>' value='<?= $row->product_id ?>'>
-                    <?php if ($row->varian_id) : ?>
-                        <input type='hidden' name='varian_id_<?= $no ?>' id='varian_id_<?= $no ?>' value='<?= $row->varian_id ?>'>
-                    <?php endif; ?>
-                    <input type='hidden' name='price_<?= $no ?>' id='price_<?= $no ?>' value='<?= $row->product_price ?>'>
                     <td> <?php echo $no++ ?> </td>
                     <?php foreach ($header as $key => $value) : ?>
                         <td>
@@ -32,17 +26,18 @@
                                         $attr = number_format($row->$key);
                                     else
                                         $attr = $row->$key;
-                                    if ($key == 'date' || $key == 'create_date' || $key == 'time')
-                                        $attr =  date("d-m-Y", $row->$key);
-                                    if ($key == 'quantity' || $key == 'qty')
-                                        $attr = "<input type='text' name='" . $key . "_" . ($no - 1) . "' id='" . $key . "_" . ($no - 1) . "' value='" . $row->$key . "' class='form-control'>";
+                                    if ($key == '_date' || $key == 'create_date' || $key == 'time' || $key == 'timestamp') {
+                                        $attr =  date("d/m/Y", $row->$key);
+                                    }
+                                    if ($key == 'status')
+                                        $attr =  $status[$row->$key];
+
                                     echo $attr;
                                     ?>
                         </td>
                     <?php endforeach; ?>
                     <?php if (isset($action)) : ?>
                         <td>
-
                             <!--  -->
                             <!-- <div class="btn-group"> -->
                             <!-- <ul class="nav navbar-nav"> -->
@@ -87,7 +82,6 @@
             <?php
             endforeach;
             ?>
-            <input type="hidden" name="total_order" value="<?= $no ?>">
         </tbody>
     </table>
 </div>

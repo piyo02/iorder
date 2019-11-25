@@ -3,7 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Order_model extends MY_Model
 {
-  protected $table = "order";
+  protected $table = "ordered";
 
   function __construct()
   {
@@ -132,10 +132,29 @@ class Order_model extends MY_Model
    * @return static
    * @author madukubah
    */
-  public function orders($start = 0, $limit = NULL)
+  public function orders($start = 0, $limit = NULL, $store_id = null, $day = null, $month = null, $year = null)
   {
+    $this->select('*');
+    $this->db->from('
+      (
+        SELECT day( date ) AS day, month( date ) AS month, year( date ) AS year 
+        FROM ordered)
+      ordered
+    ');
     if (isset($limit)) {
       $this->limit($limit);
+    }
+    if ($store_id) {
+      $this->where($this->table . '.store_id', $store_id);
+    }
+    if ($day) {
+      $this->where($this->table . '.day', $day);
+    }
+    if ($month) {
+      $this->where($this->table . '.month', $month);
+    }
+    if ($year) {
+      $this->where($this->table . '.year', $year);
     }
     $this->offset($start);
     $this->order_by($this->table . '.id', 'asc');

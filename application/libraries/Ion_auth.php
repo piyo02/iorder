@@ -645,4 +645,8 @@ class Ion_auth
 		$store = $this->store_model->store_by_user_id($user_id)->row();
 		return $store;
 	}
+	public function store_id()
+	{
+		return $this->get_store_by_user_id()->id;
+	}
 }

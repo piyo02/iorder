@@ -158,4 +158,28 @@ class Item_model extends MY_Model
     $this->order_by($this->table . '.id', 'asc');
     return $this->fetch_data();
   }
+  public function item_by_order_id($order_id = null)
+  {
+    $this->select($this->table . '.*');
+    $this->select('product.name');
+    $this->select('varian.varian');
+    if (isset($order_id)) {
+      $this->where($this->table . '.order_id', $order_id);
+    }
+    $this->join(
+      'product',
+      'product.id = item.product_id',
+      'inner'
+    );
+    $this->join(
+      'varian',
+      'varian.id = item.varian_id',
+      'left'
+    );
+    $this->order_by($this->table . '.id', 'desc');
+
+    $this->items();
+
+    return $this;
+  }
 }

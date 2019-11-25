@@ -77,6 +77,10 @@ class Product extends Customer_Controller
 
 		$table = $this->services->get_table_hold_order_config($this->current_page);
 		$table["rows"] = $this->hold_order_model->order_by_user_id($user_id)->result();
+
+		if ($table["rows"] == null)
+			redirect(site_url($this->current_page));
+
 		$table = $this->load->view('templates/tables/plain_table_order', $table, true);
 		$this->data["contents"] = $table;
 		#######################################################
@@ -107,9 +111,10 @@ class Product extends Customer_Controller
 			'store_id' => $store->id,
 			'code' => "order_" . $user_id . '_' . date('d-m-Y'),
 			'discount' => 0,
-			'date' => date('d-m-Y'),
+			'date' => date('Y-m-d'),
 			'timestamp' => time(),
 			'status' => 0,
+			'message' => $this->input->post('message'),
 		];
 		$order_id = $this->order_model->create($data_order);
 		$total =  $this->input->post('total_order');
@@ -118,7 +123,10 @@ class Product extends Customer_Controller
 			$data[$i - 1]['product_id'] = $this->input->post('product_id_' . $i);
 			$data[$i - 1]['varian_id'] = $this->input->post('varian_id_' . $i);
 			$data[$i - 1]['quantity'] = $this->input->post('quantity_' . $i);
-			$data[$i - 1]['cost'] = 0;
+			$data[$i - 1]['cost'] = $this->input->post('price_' . $i) * $this->input->post('quantity_' . $i);
+
+			$data_param['id'] = $this->input->post('id_' . $i);
+			$this->hold_order_model->delete($data_param);
 		}
 		// var_dump($data);
 		// die;
@@ -179,13 +187,12 @@ class Product extends Customer_Controller
 	public function delete()
 	{
 		if (!($_POST)) redirect(site_url($this->current_page));
-
 		$data_param['id'] 	= $this->input->post('id');
-		if ($this->group_model->delete($data_param)) {
-			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->group_model->messages()));
+		if ($this->hold_order_model->delete($data_param)) {
+			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->hold_order_model->messages()));
 		} else {
-			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->group_model->errors()));
+			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->hold_order_model->errors()));
 		}
-		redirect(site_url($this->current_page));
+		redirect(site_url($this->current_page . 'detail_order'));
 	}
 }

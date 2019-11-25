@@ -10,32 +10,21 @@ class Home extends Owner_Controller
 	public function __construct()
 	{
 		parent::__construct();
+		$this->load->model(array(
+			'product_model',
+			'order_model',
+		));
 	}
 	public function index()
 	{
-		$add_menu = array(
-			"name" => "Tambah Group",
-			"modal_id" => "add_group_",
-			"button_color" => "primary",
-			"url" => site_url($this->current_page . "add/"),
-			"form_data" => array(
-				"name" => array(
-					'type' => 'text',
-					'label' => "Nama Group",
-					'value' => "",
-				),
-				"description" => array(
-					'type' => 'textarea',
-					'label' => "Deskripsi",
-					'value' => "-",
-				),
-				'data' => NULL
-			),
-		);
+		$day = (int) date('d');
+		$month = (int) date('m');
+		$year = (int) date('Y');
 
-		$add_menu = $this->load->view('templates/actions/modal_form', $add_menu, true);
+		$store_id = $this->ion_auth->store_id();
 
-		$this->data["header_button"] =  $add_menu;
+		$this->data["products"] = $this->product_model->count_product($store_id);
+		$this->data["orders"] = $this->order_model->orders(null, null, $store_id, $day, $month, $year)->result();
 
 		#################################################################3
 		$alert = $this->session->flashdata('alert');

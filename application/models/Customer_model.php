@@ -1,14 +1,14 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Product_model extends MY_Model
+class Customer_model extends MY_Model
 {
-  protected $table = "product";
+  protected $table = "customer";
 
   function __construct()
   {
     parent::__construct($this->table);
-    parent::set_join_key('product_id');
+    parent::set_join_key('customer_id');
   }
 
   /**
@@ -25,6 +25,21 @@ class Product_model extends MY_Model
 
     $this->db->insert($this->table, $data);
     $id = $this->db->insert_id($this->table . '_id_seq');
+
+    if (isset($id)) {
+      $this->set_message("berhasil");
+      return $id;
+    }
+    $this->set_error("gagal");
+    return FALSE;
+  }
+  public function create_qr($data)
+  {
+    // Filter the data passed
+    $data = $this->_filter_data('qrcode', $data);
+
+    $this->db->insert('qrcode', $data);
+    $id = $this->db->insert_id('qrcode' . '_id_seq');
 
     if (isset($id)) {
       $this->set_message("berhasil");
@@ -70,7 +85,7 @@ class Product_model extends MY_Model
   {
     //foreign
     //delete_foreign( $data_param. $models[]  )
-    if (!$this->delete_foreign($data_param, ['varian_model', 'item_model', 'hold_order_model'])) {
+    if (!$this->delete_foreign($data_param, ['menu_model'])) {
       $this->set_error("gagal"); //('group_delete_unsuccessful');
       return FALSE;
     }
@@ -92,13 +107,13 @@ class Product_model extends MY_Model
   }
 
   /**
-   * product
+   * customer
    *
-   * @param int|array|null $id = id_products
+   * @param int|array|null $id = id_customers
    * @return static
    * @author madukubah
    */
-  public function product($id = NULL)
+  public function customer($id = NULL)
   {
     if (isset($id)) {
       $this->where($this->table . '.id', $id);
@@ -107,18 +122,18 @@ class Product_model extends MY_Model
     $this->limit(1);
     $this->order_by($this->table . '.id', 'desc');
 
-    $this->products();
+    $this->customers();
 
     return $this;
   }
   // /**
-  //  * products
+  //  * customers
   //  *
   //  *
   //  * @return static
   //  * @author madukubah
   //  */
-  // public function products(  )
+  // public function customers(  )
   // {
 
   //     $this->order_by($this->table.'.id', 'asc');
@@ -126,39 +141,25 @@ class Product_model extends MY_Model
   // }
 
   /**
-   * products
+   * customers
    *
    *
    * @return static
    * @author madukubah
    */
-  public function products($start = 0, $limit = NULL, $store_id = NULL)
+  public function customers($start = 0, $limit = NULL)
   {
-    $this->select($this->table . '.*');
-    $this->select('category.name AS category_name');
-    $this->select(" CONCAT( '" . base_url() . 'uploads/product/' . "' , " . $this->table . ".image )  as _image");
-    $this->select(" CONCAT( 'Rp. ' , " . $this->table . ".price ) as _price");
-    $this->select($this->table . '.image as image_old');
-
-
-    // $this->select('varian');
     if (isset($limit)) {
       $this->limit($limit);
     }
-    $this->join(
-      'category',
-      'category.id = product.category_id',
-      'inner'
-    );
-    if ($store_id)
-      $this->where('product.store_id', $store_id);
     $this->offset($start);
-    $this->db->order_by($this->table . '.category_id', 'asc');
-    $this->db->order_by($this->table . '.name', 'asc');
+    $this->order_by($this->table . '.id', 'asc');
     return $this->fetch_data();
   }
-  public function count_product($store_id = null)
+  public function qrcode()
   {
-    return count($this->products(null, null, $store_id)->result());
+    $this->db->select(" CONCAT( '" . base_url() . 'uploads/qrcode/' . "' , " . "qrcode.image )  as _image");
+    $this->db->order_by('qrcode.id', 'asc');
+    return $this->db->get('qrcode');
   }
 }

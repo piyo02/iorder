@@ -51,8 +51,8 @@ class Product extends Owner_Controller
 		$this->data["key"] = $this->input->get('key', FALSE);
 		$this->data["alert"] = (isset($alert)) ? $alert : NULL;
 		$this->data["current_page"] = $this->current_page;
-		$this->data["block_header"] = "Group";
-		$this->data["header"] = "Group";
+		$this->data["block_header"] = "Produk";
+		$this->data["header"] = "Produk";
 		$this->data["sub_header"] = 'Klik Tombol Action Untuk Aksi Lebih Lanjut';
 		$this->render("templates/contents/plain_content");
 	}

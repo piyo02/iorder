@@ -1,6 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
-class Order_services
+class Qrcode_services
 {
 
 
@@ -11,13 +11,10 @@ class Order_services
   {
     return get_instance()->$var;
   }
-  public function get_table_config_no_action($_page, $start_number = 1)
+  public function get_table_config_no_action($_page = null, $start_number = 1)
   {
     $table["header"] = array(
-      'name' => 'Pesanan',
-      'varian' => 'Varian Produk',
-      'quantity' => 'Banyak Pesanan',
-      'cost' => 'Total Harga',
+      '_image' => 'Qr Code',
     );
     $table["number"] = $start_number;
     return $table;
@@ -25,43 +22,30 @@ class Order_services
   public function get_table_config($_page, $start_number = 1)
   {
     $table["header"] = array(
-      'code' => 'Kode Pesanan',
-      'timestamp' => 'Tanggal',
-      'message' => 'Keterangan',
-      'status' => 'Status',
+      'name' => 'Nama Group',
+      'description' => 'Deskripsi',
     );
     $table["number"] = $start_number;
     $table["action"] = array(
-      array(
-        "name" => 'Lihat Pesanan',
-        "type" => "link",
-        "url" => site_url($_page . 'detail_order/'),
-        "button_color" => "primary",
-        "param" => "id",
-        "title" => "Group",
-        "data_name" => "name",
-      ),
       array(
         "name" => 'Edit',
         "type" => "modal_form",
         "modal_id" => "edit_",
         "url" => site_url($_page . "edit/"),
-        "button_color" => "success",
+        "button_color" => "primary",
         "param" => "id",
         "form_data" => array(
           "id" => array(
             'type' => 'hidden',
             'label' => "id",
           ),
-          "status" => array(
-            'type' => 'select',
-            'label' => "Status",
-            'options' => array(
-              0 => 'Pesanan Baru',
-              1 => 'Sedang dibuat',
-              2 => 'Sudah diantar',
-              3 => 'Sudah dibayar',
-            ),
+          "name" => array(
+            'type' => 'text',
+            'label' => "Nama Group",
+          ),
+          "description" => array(
+            'type' => 'textarea',
+            'label' => "Deskripsi",
           ),
         ),
         "title" => "Group",
