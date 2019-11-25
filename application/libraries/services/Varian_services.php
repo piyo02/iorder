@@ -67,9 +67,13 @@ class Varian_services
             'type' => 'hidden',
             'label' => "id",
           ),
+          "product_id" => array(
+            'type' => 'hidden',
+            'label' => "id",
+          ),
         ),
         "title" => "Group",
-        "data_name" => "name",
+        "data_name" => "varian",
       ),
     );
     return $table;

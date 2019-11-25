@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="<?= base_url('assets-user/') ?>css/owl.carousel.min.css">
     <!-- Main css -->
     <link href="<?= base_url('assets-user/') ?>css/style.css" rel="stylesheet">
+    <script src="<?= base_url('assets-user/') ?>js/jquery-3.2.1.min.js"></script>
 </head>
 
 <body data-spy="scroll" data-target="#navbar" data-offset="30">

@@ -37,11 +37,12 @@ class Varian extends Owner_Controller
 			"name" => 'Kembali',
 			"type" => "link",
 			"url" => site_url("owner/product"),
-			"button_color" => "primary",
-			"param" => "id",
+			"button_color" => "success",
 			"title" => "Group",
 			"data_name" => "name",
 		);
+		$btn_back = $this->load->view('templates/actions/link', $btn_back, true);
+
 		$this->data["header_button"] =  $add_menu . ' ' . $btn_back;
 		// return;
 		#################################################################3
@@ -101,7 +102,7 @@ class Varian extends Owner_Controller
 			if (validation_errors() || $this->varian_model->errors()) $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->data['message']));
 		}
 
-		redirect(site_url($this->current_page));
+		redirect(site_url($this->current_page . 'index/' . $data['product_id']));
 	}
 
 	public function delete()
@@ -114,6 +115,7 @@ class Varian extends Owner_Controller
 		} else {
 			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->varian_model->errors()));
 		}
+		redirect(site_url($this->current_page . 'index/' . $this->input->post('product_id')));
 		redirect(site_url($this->current_page));
 	}
 }

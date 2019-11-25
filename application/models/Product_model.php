@@ -132,11 +132,12 @@ class Product_model extends MY_Model
    * @return static
    * @author madukubah
    */
-  public function products($start = 0, $limit = NULL)
+  public function products($start = 0, $limit = NULL, $store_id = NULL)
   {
     $this->select($this->table . '.*');
     $this->select('category.name AS category_name');
     $this->select(" CONCAT( '" . base_url() . 'uploads/product/' . "' , " . $this->table . ".image )  as _image");
+    $this->select(" CONCAT( 'Rp. ' , " . $this->table . ".price ) as _price");
     $this->select($this->table . '.image as image_old');
 
 
@@ -149,14 +150,11 @@ class Product_model extends MY_Model
       'category.id = product.category_id',
       'inner'
     );
-    // $this->join(
-    //   'varian',
-    //   'varian.product_id = product.id',
-    //   'inner'
-    // );
+    if ($store_id)
+      $this->where('product.store_id', $store_id);
     $this->offset($start);
-    $this->order_by($this->table . '.id', 'asc');
-    // $this->order_by('varian.product_id', 'asc');
+    $this->db->order_by($this->table . '.category_id', 'asc');
+    $this->db->order_by($this->table . '.name', 'asc');
     return $this->fetch_data();
   }
 }

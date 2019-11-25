@@ -10,27 +10,21 @@ class Product extends Customer_Controller
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->library('services/Group_services');
-		$this->services = new Group_services;
+		$this->load->library('services/Product_services');
+		$this->services = new Product_services;
 		$this->load->model(array(
 			'group_model',
+			'product_model',
+			'category_model',
+			'hold_order_model',
+			'order_model',
+			'item_model',
 		));
 	}
 	public function index()
 	{
-		$page = ($this->uri->segment(4)) ? ($this->uri->segment(4) -  1) : 0;
-		// echo $page; return;
-		//pagination parameter
-		$pagination['base_url'] = base_url($this->current_page) . '/index';
-		$pagination['total_records'] = $this->group_model->record_count();
-		$pagination['limit_per_page'] = 10;
-		$pagination['start_record'] = $page * $pagination['limit_per_page'];
-		$pagination['uri_segment'] = 4;
-		//set pagination
-		if ($pagination['total_records'] > 0) $this->data['pagination_links'] = $this->setPagination($pagination);
-		#################################################################3
 		$table = $this->services->get_table_config($this->current_page);
-		$table["rows"] = $this->group_model->groups($pagination['start_record'], $pagination['limit_per_page'])->result();
+		$table["rows"] = $this->group_model->groups()->result();
 		$table = $this->load->view('templates/tables/plain_table', $table, true);
 		// $this->data["contents"] = $table;
 		$add_menu = array(
@@ -55,9 +49,19 @@ class Product extends Customer_Controller
 
 		$add_menu = $this->load->view('templates/actions/modal_form', $add_menu, true);
 
-		$this->data["header_button"] =  $add_menu;
+		// $this->data["header_button"] =  $add_menu;
 		// return;
 		#################################################################3
+		$user_id = $this->ion_auth->get_user_id();
+		$store = $this->ion_auth->get_store_by_user_id($user_id);
+
+
+		$this->data['user_id'] = $user_id;
+		$this->data['store'] = $store;
+		$this->data['categories'] = $this->category_model->categories(null, null, $store->id)->result();
+		$this->data['products'] = $this->product_model->products(null, null, $store->id)->result();
+
+
 		$alert = $this->session->flashdata('alert');
 		$this->data["key"] = $this->input->get('key', FALSE);
 		$this->data["alert"] = (isset($alert)) ? $alert : NULL;
@@ -67,29 +71,86 @@ class Product extends Customer_Controller
 		$this->data["sub_header"] = 'Klik Tombol Action Untuk Aksi Lebih Lanjut';
 		$this->render("templates/user_contents/plain_content");
 	}
-
-
-	public function add()
+	public function detail_order()
 	{
-		if (!($_POST)) redirect(site_url($this->current_page));
+		$user_id = $this->ion_auth->get_user_id();
+
+		$table = $this->services->get_table_hold_order_config($this->current_page);
+		$table["rows"] = $this->hold_order_model->order_by_user_id($user_id)->result();
+		$table = $this->load->view('templates/tables/plain_table_order', $table, true);
+		$this->data["contents"] = $table;
+		#######################################################
+		$store = $this->ion_auth->get_store_by_user_id($user_id);
+
+		$this->data['user_id'] = $user_id;
+		$this->data['store'] = $store;
+		// $this->data['hold_order'] = $this->hold_order_model->order_by_user_id($user_id)->result();
+
+
+		$alert = $this->session->flashdata('alert');
+		$this->data["url"] = base_url('product/order');
+		$this->data["key"] = $this->input->get('key', FALSE);
+		$this->data["alert"] = (isset($alert)) ? $alert : NULL;
+		$this->data["current_page"] = $this->current_page;
+		$this->data["block_header"] = "Group";
+		$this->data["header"] = "Group";
+		$this->data["sub_header"] = 'Klik Tombol Action Untuk Aksi Lebih Lanjut';
+		$this->render("templates/user_contents/cart");
+	}
+	public function order()
+	{
+		$user_id = $this->ion_auth->get_user_id();
+		$store = $this->ion_auth->get_store_by_user_id($user_id);
+
+		$data_order = [
+			'user_id' => $user_id,
+			'store_id' => $store->id,
+			'code' => "order_" . $user_id . '_' . date('d-m-Y'),
+			'discount' => 0,
+			'date' => date('d-m-Y'),
+			'timestamp' => time(),
+			'status' => 0,
+		];
+		$order_id = $this->order_model->create($data_order);
+		$total =  $this->input->post('total_order');
+		for ($i = 1; $i < $total; $i++) {
+			$data[$i - 1]['order_id'] = $order_id;
+			$data[$i - 1]['product_id'] = $this->input->post('product_id_' . $i);
+			$data[$i - 1]['varian_id'] = $this->input->post('varian_id_' . $i);
+			$data[$i - 1]['quantity'] = $this->input->post('quantity_' . $i);
+			$data[$i - 1]['cost'] = 0;
+		}
+		// var_dump($data);
+		// die;
+		if ($this->item_model->insert_batch($data)) {
+			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->item_model->messages()));
+			redirect(site_url($this->current_page));
+		}
+	}
+	public function add_hold_order()
+	{
+		// if (!($_POST)) redirect(site_url($this->current_page));
 
 		// echo var_dump( $data );return;
-		$this->form_validation->set_rules($this->services->validation_config());
+		$this->form_validation->set_rules('user_id', 'User Id', 'trim|required');
+		$this->form_validation->set_rules('product_id', 'Produk', 'trim|required');
+		$this->form_validation->set_rules('quantity', 'Jumlah', 'trim|required');
 		if ($this->form_validation->run() === TRUE) {
-			$data['name'] = $this->input->post('name');
-			$data['description'] = $this->input->post('description');
+			$data['user_id'] = $this->input->post('user_id');
+			$data['product_id'] = $this->input->post('product_id');
+			$data['quantity'] = $this->input->post('quantity');
 
-			if ($this->group_model->create($data)) {
-				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->group_model->messages()));
+			if ($this->hold_order_model->create($data)) {
+				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->hold_order_model->messages()));
 			} else {
-				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->group_model->errors()));
+				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->hold_order_model->errors()));
 			}
 		} else {
-			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->m_account->errors() ? $this->group_model->errors() : $this->session->flashdata('message')));
-			if (validation_errors() || $this->group_model->errors()) $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->data['message']));
+			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->m_account->errors() ? $this->hold_order_model->errors() : $this->session->flashdata('message')));
+			if (validation_errors() || $this->hold_order_model->errors()) $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->data['message']));
 		}
 
-		redirect(site_url($this->current_page));
+		// redirect(site_url($this->current_page));
 	}
 
 	public function edit()
@@ -97,24 +158,22 @@ class Product extends Customer_Controller
 		if (!($_POST)) redirect(site_url($this->current_page));
 
 		// echo var_dump( $data );return;
-		$this->form_validation->set_rules($this->services->validation_config());
+		$this->form_validation->set_rules('quantity', 'Jumlah', 'trim|required');
 		if ($this->form_validation->run() === TRUE) {
-			$data['name'] = $this->input->post('name');
-			$data['description'] = $this->input->post('description');
+			$data['quantity'] = $this->input->post('quantity');
 
 			$data_param['id'] = $this->input->post('id');
-
-			if ($this->group_model->update($data, $data_param)) {
-				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->group_model->messages()));
+			if ($this->hold_order_model->update($data, $data_param)) {
+				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->hold_order_model->messages()));
 			} else {
-				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->group_model->errors()));
+				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->hold_order_model->errors()));
 			}
 		} else {
-			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->m_account->errors() ? $this->group_model->errors() : $this->session->flashdata('message')));
-			if (validation_errors() || $this->group_model->errors()) $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->data['message']));
+			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->m_account->errors() ? $this->hold_order_model->errors() : $this->session->flashdata('message')));
+			if (validation_errors() || $this->hold_order_model->errors()) $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->data['message']));
 		}
 
-		redirect(site_url($this->current_page));
+		redirect(site_url($this->current_page . 'detail_order'));
 	}
 
 	public function delete()

@@ -642,7 +642,7 @@ class Ion_auth
 	{
 		if (!$user_id)
 			$user_id = $this->get_user_id();
-		$store = $this->store_model->store_by_user_id($user_id);
+		$store = $this->store_model->store_by_user_id($user_id)->row();
 		return $store;
 	}
 }

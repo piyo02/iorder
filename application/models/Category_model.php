@@ -132,12 +132,14 @@ class Category_model extends MY_Model
    * @return static
    * @author madukubah
    */
-  public function categories($start = 0, $limit = NULL)
+  public function categories($start = 0, $limit = NULL, $store_id = NULL)
   {
     $this->select('*');
     if (isset($limit)) {
       $this->limit($limit);
     }
+    if ($store_id)
+      $this->where('store_id', $store_id);
     $this->offset($start);
     $this->order_by($this->table . '.id', 'asc');
     return $this->fetch_data();

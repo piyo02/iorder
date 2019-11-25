@@ -33,6 +33,22 @@ class Item_model extends MY_Model
     $this->set_error("gagal");
     return FALSE;
   }
+  public function insert_batch($data)
+  {
+    // Filter the data passed
+    // $data = $this->_filter_data($this->table, $data);
+    // var_dump($data);
+    // die;
+    $this->db->insert_batch($this->table, $data);
+    $id = $this->db->insert_id($this->table . '_id_seq');
+
+    if (isset($id)) {
+      $this->set_message("berhasil");
+      return $id;
+    }
+    $this->set_error("gagal");
+    return FALSE;
+  }
   /**
    * update
    *

@@ -141,4 +141,28 @@ class Hold_order_model extends MY_Model
     $this->order_by($this->table . '.id', 'asc');
     return $this->fetch_data();
   }
+  public function order_by_user_id($user_id = nulll)
+  {
+    $this->select('hold_order.*');
+    // $this->select('*');
+    $this->select('product.name AS product_name');
+    $this->select('product.price AS product_price');
+    $this->select(" CONCAT( '" . base_url() . 'uploads/product/' . "' , " . "product.image )  as _image");
+    if (isset($user_id)) {
+      $this->where($this->table . '.user_id', $user_id);
+    }
+    $this->join(
+      'product',
+      'product.id = hold_order.product_id',
+      'inner'
+    );
+    $this->join(
+      'varian',
+      'varian.id = hold_order.varian_id',
+      'left'
+    );
+    $this->orders();
+
+    return $this;
+  }
 }

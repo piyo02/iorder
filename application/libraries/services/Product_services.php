@@ -195,4 +195,33 @@ class Product_services
     );
     return $form_data;
   }
+  public function get_table_hold_order_config($_page, $start_number = 1)
+  {
+    $table["header"] = array(
+      'product_name' => 'Nama Produk',
+      'product_price' => 'Harga',
+      'quantity' => 'Banyak Pesanan',
+      // '_image' => 'Foto Produk',
+    );
+    $table["number"] = $start_number;
+    $table["action"] = array(
+      array(
+        "name" => 'X',
+        "type" => "modal_delete",
+        "modal_id" => "delete_",
+        "url" => site_url($_page . "delete/"),
+        "button_color" => "danger",
+        "param" => "id",
+        "form_data" => array(
+          "id" => array(
+            'type' => 'hidden',
+            'label' => "id",
+          ),
+        ),
+        "title" => "Group",
+        "data_name" => "product_name",
+      ),
+    );
+    return $table;
+  }
 }
