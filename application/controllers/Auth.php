@@ -10,6 +10,9 @@ class Auth extends Public_Controller
                 $this->config->load('ion_auth', TRUE);
                 $this->load->helper(array('url', 'language'));
                 $this->lang->load('auth');
+                $this->load->model(array(
+                        'customer_model',
+                ));
         }
 
         public function login()
@@ -156,16 +159,48 @@ class Auth extends Public_Controller
                         $this->render("V_register_page");
                 }
         }
-
-        public function logout()
+        public function logout($id = null)
         {
-                $this->data['title'] = "Logout";
+                if (!$id) {
+                        $this->data['title'] = "Logout";
 
-                // log the user out
-                $logout = $this->ion_auth->logout();
+                        // log the user out
+                        $logout = $this->ion_auth->logout();
 
-                // redirect them to the login page
-                $this->session->set_flashdata('message', $this->ion_auth->messages());
+                        // redirect them to the login page
+                        $this->session->set_flashdata('message', $this->ion_auth->messages());
+                } else {
+                        $this->session->unset_userdata('user_id', 'group_id', 'store_id');
+                        $this->session->set_flashdata('message', 'Berhasil logout');
+                }
                 redirect(site_url(), 'refresh');
+        }
+        public function qrcode()
+        {
+                $id = $this->input->get('id');
+                $login = $this->customer_model->qrcode($id)->row();
+                switch ($login->group_id) {
+                        case 3:
+                                # code...
+                                break;
+                        case 4:
+                                $data['group_id'] = $login->group_id;
+                                $data['store_id'] = $login->store_id;
+                                $data['name'] = "";
+
+                                // $id = 3;
+                                $id = $this->customer_model->create($data);
+                                if ($id) {
+                                        $session_data['user_id'] = $id;
+                                        $this->session->set_userdata($session_data);
+
+                                        $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->customer_model->messages()));
+                                        redirect(base_url('product'));
+                                } else {
+                                        $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, 'QR Code Erro, silahkan hubungi penjual'));
+                                        redirect(base_url('auth/login'));
+                                }
+                                break;
+                }
         }
 }

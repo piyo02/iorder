@@ -14,6 +14,7 @@
                                 <li class="nav-item"> <a class="nav-link" href="#pricing">PRICING</a> </li>
                                 <li class="nav-item"> <a class="nav-link" href="#contact">CONTACT</a> </li> -->
                             <li class="nav-item"><a href="#" class="btn btn-outline-light my-3 my-sm-0 ml-lg-3">Pesanan</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="<?= base_url('auth/logout/1') ?>">Logout</a> </li>
                         </ul>
                     </div>
                 </nav>

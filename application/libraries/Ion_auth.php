@@ -34,6 +34,7 @@ class Ion_auth
 	protected $last_name;
 	protected $phone;
 	protected $address;
+	protected $active;
 	protected $email;
 	protected $group_id;
 	/**
@@ -360,7 +361,23 @@ class Ion_auth
 
 		return $recheck;
 	}
+	public function login_as_customer()
+	{
+		$this->load->model('customer_model');
 
+		$user_id = $this->session->userdata('user_id');
+		$user = $this->customer_model->customer($user_id)->row();
+		if (!$user) return FALSE;
+
+		$session_data = [
+			// 'user_id'           => $user->id, //everyone likes to overwrite id so we'll use user_id
+			'group_id'       	=> $user->group_id,
+			'store_id'          => $user->store_id,
+		];
+
+		$this->session->set_userdata($session_data);
+		return TRUE;
+	}
 	/**
 	 * @return int|null The user's ID from the session user data or NULL if not found
 	 * @author jrmadsen67
@@ -579,6 +596,7 @@ class Ion_auth
 			$this->email		= $user->email;
 			$this->group_id		= $user->group_id;
 			$this->address		= $user->address;
+			$this->active		= $user->active;
 		}
 		// echo var_dump($user);
 
@@ -634,6 +652,15 @@ class Ion_auth
 				'label' => "User Group",
 				'options' => $group_select,
 				'selected' => $this->group_id,
+			),
+			"active" => array(
+				'type' => 'select',
+				'label' => "Aktivasi",
+				'options' => array(
+					0 => 'Tidak Aktif',
+					1 => 'Aktif',
+				),
+				'selected' => $this->active,
 			),
 		);
 		return $_data;

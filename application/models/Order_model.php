@@ -134,30 +134,30 @@ class Order_model extends MY_Model
    */
   public function orders($start = 0, $limit = NULL, $store_id = null, $day = null, $month = null, $year = null)
   {
-    $this->select('*');
+    $this->db->select('*');
     $this->db->from('
       (
-        SELECT day( date ) AS day, month( date ) AS month, year( date ) AS year 
+        SELECT ordered.*, day( ordered.date ) AS day, month( ordered.date ) AS month, year( ordered.date ) AS year 
         FROM ordered)
-      ordered
+        ordered
     ');
     if (isset($limit)) {
       $this->limit($limit);
     }
     if ($store_id) {
-      $this->where($this->table . '.store_id', $store_id);
+      $this->db->where($this->table . '.store_id', $store_id);
     }
     if ($day) {
-      $this->where($this->table . '.day', $day);
+      $this->db->where($this->table . '.day', $day);
     }
     if ($month) {
-      $this->where($this->table . '.month', $month);
+      $this->db->where($this->table . '.month', $month);
     }
     if ($year) {
-      $this->where($this->table . '.year', $year);
+      $this->db->where($this->table . '.year', $year);
     }
     $this->offset($start);
     $this->order_by($this->table . '.id', 'asc');
-    return $this->fetch_data();
+    return $this->db->get();
   }
 }

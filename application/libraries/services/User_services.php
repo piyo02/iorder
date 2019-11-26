@@ -9,6 +9,7 @@ class User_services
 	protected $last_name;
 	protected $phone;
 	protected $address;
+	protected $active;
 	protected $email;
 	protected $group_id;
 
@@ -20,6 +21,7 @@ class User_services
 		$this->last_name	= "";
 		$this->phone		  = "";
 		$this->address		= "";
+		$this->active		= "";
 		$this->email		  = "";
 		$this->group_id		= '';
 	}
@@ -53,6 +55,7 @@ class User_services
 			'phone' => 'No Telepon',
 			'address' => 'Alamat',
 			'email' => 'Email',
+			'active' => 'Aktivasi',
 		);
 		$table["number"] = $start_number;
 		$table["action"] = array(
@@ -112,6 +115,7 @@ class User_services
 			$this->email		= $user->email;
 			$this->group_id		= $user->group_id;
 			$this->address		= $user->address;
+			$this->active		= $user->active;
 		}
 
 		$groups = $this->ion_auth_model->groups()->result();
@@ -156,6 +160,14 @@ class User_services
 				'type' => 'text',
 				'label' => "User Group",
 				'value' => $group_select[$this->group_id],
+			),
+			"active" => array(
+				'type' => 'select',
+				'label' => "Aktivasi",
+				'options' => array(
+					0 => 'Tidak Aktif',
+					1 => 'Aktif',
+				),
 			),
 		);
 		return $_data;

@@ -149,7 +149,7 @@ class Hold_order_model extends MY_Model
     $this->select('product.price AS product_price');
     $this->select(" CONCAT( '" . base_url() . 'uploads/product/' . "' , " . "product.image )  as _image");
     if (isset($user_id)) {
-      $this->where($this->table . '.user_id', $user_id);
+      $this->where($this->table . '.customer_id', $user_id);
     }
     $this->join(
       'product',

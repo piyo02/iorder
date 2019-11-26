@@ -1974,7 +1974,6 @@ class Ion_auth_model extends MY_Model
 		
 		// Filter the data passed
 		$data = $this->_filter_data($this->tables['users'], $data);
-
 		if (array_key_exists($this->identity_column, $data) || array_key_exists('password', $data) || array_key_exists('email', $data))
 		{
 			if (array_key_exists('password', $data))

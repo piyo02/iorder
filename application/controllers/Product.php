@@ -6,6 +6,8 @@ class Product extends Customer_Controller
 	private $name = null;
 	private $parent_page = 'product';
 	private $current_page = 'product/';
+	private $store_id = null;
+	private $user_id = null;
 
 	public function __construct()
 	{
@@ -19,7 +21,10 @@ class Product extends Customer_Controller
 			'hold_order_model',
 			'order_model',
 			'item_model',
+			'store_model',
 		));
+		$this->store_id = $this->session->userdata('store_id');
+		$this->user_id = $this->session->userdata('user_id');
 	}
 	public function index()
 	{
@@ -52,14 +57,16 @@ class Product extends Customer_Controller
 		// $this->data["header_button"] =  $add_menu;
 		// return;
 		#################################################################3
-		$user_id = $this->ion_auth->get_user_id();
-		$store = $this->ion_auth->get_store_by_user_id($user_id);
+		$user_id = $this->user_id;
+		$store_id = $this->store_id;
+
+		$store = $this->store_model->store($store_id)->row();
 
 
 		$this->data['user_id'] = $user_id;
 		$this->data['store'] = $store;
-		$this->data['categories'] = $this->category_model->categories(null, null, $store->id)->result();
-		$this->data['products'] = $this->product_model->products(null, null, $store->id)->result();
+		$this->data['categories'] = $this->category_model->categories(null, null, $store_id)->result();
+		$this->data['products'] = $this->product_model->products(null, null, $store_id)->result();
 
 
 		$alert = $this->session->flashdata('alert');
@@ -69,11 +76,14 @@ class Product extends Customer_Controller
 		$this->data["block_header"] = "Group";
 		$this->data["header"] = "Group";
 		$this->data["sub_header"] = 'Klik Tombol Action Untuk Aksi Lebih Lanjut';
-		$this->render("templates/user_contents/plain_content");
+		$this->render("customer/plain_content");
 	}
 	public function detail_order()
 	{
-		$user_id = $this->ion_auth->get_user_id();
+		$user_id = $this->user_id;
+		$store_id = $this->store_id;
+
+		$store = $this->store_model->store($store_id)->row();
 
 		$table = $this->services->get_table_hold_order_config($this->current_page);
 		$table["rows"] = $this->hold_order_model->order_by_user_id($user_id)->result();
@@ -84,7 +94,6 @@ class Product extends Customer_Controller
 		$table = $this->load->view('templates/tables/plain_table_order', $table, true);
 		$this->data["contents"] = $table;
 		#######################################################
-		$store = $this->ion_auth->get_store_by_user_id($user_id);
 
 		$this->data['user_id'] = $user_id;
 		$this->data['store'] = $store;
@@ -99,16 +108,16 @@ class Product extends Customer_Controller
 		$this->data["block_header"] = "Group";
 		$this->data["header"] = "Group";
 		$this->data["sub_header"] = 'Klik Tombol Action Untuk Aksi Lebih Lanjut';
-		$this->render("templates/user_contents/cart");
+		$this->render("customer/cart");
 	}
 	public function order()
 	{
-		$user_id = $this->ion_auth->get_user_id();
-		$store = $this->ion_auth->get_store_by_user_id($user_id);
+		$user_id = $this->user_id;
+		$store_id = $this->store_id;
 
 		$data_order = [
-			'user_id' => $user_id,
-			'store_id' => $store->id,
+			'customer_id' => $user_id,
+			'store_id' => $store_id,
 			'code' => "order_" . $user_id . '_' . date('d-m-Y'),
 			'discount' => 0,
 			'date' => date('Y-m-d'),
@@ -144,7 +153,7 @@ class Product extends Customer_Controller
 		$this->form_validation->set_rules('product_id', 'Produk', 'trim|required');
 		$this->form_validation->set_rules('quantity', 'Jumlah', 'trim|required');
 		if ($this->form_validation->run() === TRUE) {
-			$data['user_id'] = $this->input->post('user_id');
+			$data['customer_id'] = $this->input->post('user_id');
 			$data['product_id'] = $this->input->post('product_id');
 			$data['quantity'] = $this->input->post('quantity');
 

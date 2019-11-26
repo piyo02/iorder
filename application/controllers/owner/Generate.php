@@ -19,6 +19,9 @@ class Generate extends Owner_Controller
 	}
 	public function index()
 	{
+		$user_id = $this->ion_auth->get_user_id();
+		$store_id = $this->ion_auth->store_id($user_id);
+
 		$table = $this->services->get_table_config_no_action($this->current_page);
 		$table["rows"] = $this->customer_model->qrcode()->result();
 		$table = $this->load->view('templates/tables/plain_table_image', $table, true);
@@ -29,9 +32,27 @@ class Generate extends Owner_Controller
 			"button_color" => "primary",
 			"url" => site_url($this->current_page . "add/"),
 			"form_data" => array(
+				"store_id" => array(
+					'type' => 'hidden',
+					'label' => "store_id",
+					'value' => $store_id,
+				),
 				"name" => array(
 					'type' => 'text',
 					'label' => "QR Code",
+					'value' => "",
+				),
+				'group_id' => array(
+					'type' => 'select',
+					'label' => "Group",
+					'options' => array(
+						3 => 'Pemilik Toko',
+						4 => 'Pelanggan',
+					),
+				),
+				"url" => array(
+					'type' => 'text',
+					'label' => "URL",
 					'value' => "",
 				),
 			),
@@ -61,7 +82,7 @@ class Generate extends Owner_Controller
 		// echo var_dump( $data );return;
 		$this->form_validation->set_rules('name', 'QR Code', 'trim|required');
 		if ($this->form_validation->run() === TRUE) {
-			$data['name'] = $this->input->post('name');
+			$name = $this->input->post('name');
 
 			$this->load->library('ciqrcode');
 
@@ -75,17 +96,19 @@ class Generate extends Owner_Controller
 			$config['white']			= array(70, 130, 180);
 			$this->ciqrcode->initialize($config);
 
-			$image_name = $data['name'] . '.png';
-
-			$params['data'] = 'http://localhost/iorder/auth/login';
-			$params['level'] = 'H';
-			$params['size'] = 10;
-			$params['savename'] = FCPATH . $config['imagedir'] . $image_name;
-
-			$this->ciqrcode->generate($params);
+			$image_name = $name . '.png';
 
 			$data['image'] = $image_name;
-			if ($this->customer_model->create_qr($data)) {
+			$data['group_id'] =  $this->input->post('group_id');
+			$data['store_id'] =  $this->input->post('store_id');
+			$id = $this->customer_model->create_qr($data);
+			if ($id) {
+				$params['data'] = 'http://www.localhost/iorder/auth/qrcode?id=' . $id;
+				$params['level'] = 'H';
+				$params['size'] = 10;
+				$params['savename'] = FCPATH . $config['imagedir'] . $image_name;
+				$this->ciqrcode->generate($params);
+
 				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->customer_model->messages()));
 			} else {
 				$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->customer_model->errors()));

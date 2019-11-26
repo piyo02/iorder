@@ -15,6 +15,7 @@ class Qrcode_services
   {
     $table["header"] = array(
       '_image' => 'Qr Code',
+      'group_name' => 'Group',
     );
     $table["number"] = $start_number;
     return $table;

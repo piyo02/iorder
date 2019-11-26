@@ -34,6 +34,6 @@ class Home extends Owner_Controller
 		$this->data["block_header"] = "Group";
 		$this->data["header"] = "Group";
 		$this->data["sub_header"] = 'Klik Tombol Action Untuk Aksi Lebih Lanjut';
-		$this->render("admin/dashboard/content");
+		$this->render("owner/dashboard/content");
 	}
 }

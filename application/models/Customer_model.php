@@ -156,9 +156,19 @@ class Customer_model extends MY_Model
     $this->order_by($this->table . '.id', 'asc');
     return $this->fetch_data();
   }
-  public function qrcode()
+  public function qrcode($id = null)
   {
+    $this->db->select('*');
+    $this->db->select('
+                      CASE
+                        WHEN qrcode.group_id = 1 THEN "Admin"
+                        WHEN qrcode.group_id = 2 THEN "Uadmin"
+                        WHEN qrcode.group_id = 3 THEN "Pemilik Toko"
+                        WHEN qrcode.group_id = 4 THEN "Pelanggan"
+                      END AS group_name', FALSE);
     $this->db->select(" CONCAT( '" . base_url() . 'uploads/qrcode/' . "' , " . "qrcode.image )  as _image");
+    if ($id)
+      $this->db->where('id', $id);
     $this->db->order_by('qrcode.id', 'asc');
     return $this->db->get('qrcode');
   }

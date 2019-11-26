@@ -103,6 +103,26 @@ class User_Controller extends MY_Controller
 		parent::render($the_view, $template);
 	}
 }
+class Custom_Controller extends MY_Controller
+{
+
+	public function __construct()
+	{
+		parent::__construct();
+		if (!$this->ion_auth->login_as_customer()) {
+			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER,  $this->lang->line('login_not_login')));
+			redirect(site_url('/auth/login'));
+		} else {
+			$group_id = 3;
+			$this->set_menu($group_id);
+		}
+	}
+
+	protected function render($the_view = NULL, $template = 'admin_master')
+	{
+		parent::render($the_view, $template);
+	}
+}
 
 class Admin_Controller extends User_Controller
 {
@@ -156,7 +176,7 @@ class Owner_Controller extends User_Controller
 	}
 }
 
-class Customer_Controller extends User_Controller
+class Customer_Controller extends Custom_Controller
 {
 	public function __construct()
 	{

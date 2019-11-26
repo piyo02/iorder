@@ -38,7 +38,8 @@ class Users extends Uadmin_Controller
 		$table["rows"] = $this->ion_auth->users_limit($pagination['limit_per_page'], $pagination['start_record'])->result();
 		unset($table["rows"][0]);
 		unset($table["rows"][1]);
-		$table = $this->load->view('templates/tables/plain_table', $table, true);
+		$table['status'] = ['Tidak Aktif', 'Aktif'];
+		$table = $this->load->view('templates/tables/plain_table_status', $table, true);
 		$this->data["contents"] = $table;
 
 		$link_add =
@@ -126,6 +127,7 @@ class Users extends Uadmin_Controller
 				'email' => $this->input->post('email'),
 				'phone' => $this->input->post('phone'),
 				'address' => $this->input->post('address'),
+				'active' => $this->input->post('active'),
 			);
 		}
 
@@ -181,6 +183,7 @@ class Users extends Uadmin_Controller
 				'email' => $this->input->post('email'),
 				'phone' => $this->input->post('phone'),
 				'group_id' => $this->input->post('group_id'),
+				'active' => $this->input->post('active'),
 			);
 
 			if ($this->input->post('password')) {

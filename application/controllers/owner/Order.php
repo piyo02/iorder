@@ -19,6 +19,10 @@ class Order extends Owner_Controller
 	}
 	public function index()
 	{
+		$day = (int) date('d');
+		$month = (int) date('m');
+		$year = (int) date('Y');
+
 		$store_id = $this->ion_auth->store_id();
 		$page = ($this->uri->segment(4)) ? ($this->uri->segment(4) -  1) : 0;
 		// echo $page; return;
@@ -32,7 +36,7 @@ class Order extends Owner_Controller
 		if ($pagination['total_records'] > 0) $this->data['pagination_links'] = $this->setPagination($pagination);
 		#################################################################3
 		$table = $this->services->get_table_config($this->current_page);
-		$table["rows"] = $this->order_model->orders($pagination['start_record'], $pagination['limit_per_page'], $store_id)->result();
+		$table["rows"] = $this->order_model->orders($pagination['start_record'], $pagination['limit_per_page'], $store_id, $day, $month, $year)->result();
 		$table["status"] = ['Pesanan baru', 'Sedang dibuat', 'Sudah diantar', 'Sudah dibayar'];
 		$table = $this->load->view('templates/tables/plain_table_status', $table, true);
 		$this->data["contents"] = $table;
