@@ -11,13 +11,24 @@ class Qrcode_services
   {
     return get_instance()->$var;
   }
-  public function get_table_config_no_action($_page = null, $start_number = 1)
+  public function get_table_config_qrcode($_page = null, $start_number = 1)
   {
     $table["header"] = array(
       '_image' => 'Qr Code',
       'group_name' => 'Group',
     );
     $table["number"] = $start_number;
+    $table["action"] = array(
+      array(
+        "name" => 'Download',
+        "type" => "download",
+        "url" => site_url($_page . "edit/"),
+        "button_color" => "primary",
+        "param" => "_image",
+        "title" => "Group",
+        "data_name" => "name",
+      ),
+    );
     return $table;
   }
   public function get_table_config($_page, $start_number = 1)

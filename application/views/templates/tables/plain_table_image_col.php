@@ -87,6 +87,10 @@
                                                     $value["data"] = $row;
                                                     $this->load->view('templates/actions/link', $value);
                                                     break;
+                                                case "download":
+                                                    $value["data"] = $row;
+                                                    $this->load->view('templates/actions/download', $value);
+                                                    break;
                                                 case "modal_delete":
                                                     $value["data"] = $row;
                                                     $this->load->view('templates/actions/modal_delete', $value);

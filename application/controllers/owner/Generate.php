@@ -22,7 +22,7 @@ class Generate extends Owner_Controller
 		$user_id = $this->ion_auth->get_user_id();
 		$store_id = $this->ion_auth->store_id($user_id);
 
-		$table = $this->services->get_table_config_no_action($this->current_page);
+		$table = $this->services->get_table_config_qrcode($this->current_page);
 		$table["rows"] = $this->customer_model->qrcode()->result();
 		$table = $this->load->view('templates/tables/plain_table_image', $table, true);
 		$this->data["contents"] = $table;

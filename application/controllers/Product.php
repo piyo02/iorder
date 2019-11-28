@@ -136,9 +136,15 @@ class Product extends Customer_Controller
 
 			$data_param['id'] = $this->input->post('id_' . $i);
 			$this->hold_order_model->delete($data_param);
+
+			$product = $this->product_model->product($this->input->post('product_id_' . $i))->row();
+			$data_product = [
+				'qty' => $product->qty - $this->input->post('quantity_' . $i),
+				'name' => 'Nama Edit'
+			];
+			$param['id'] = $product->id;
+			$this->product_model->update($data_product, $param);
 		}
-		// var_dump($data);
-		// die;
 		if ($this->item_model->insert_batch($data)) {
 			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->item_model->messages()));
 			redirect(site_url($this->current_page));
