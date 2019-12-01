@@ -64,7 +64,8 @@ class Auth extends Public_Controller
                 $this->form_validation->set_rules('password', "Kata Sandi", 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
                 $this->form_validation->set_rules('password_confirm', "konfirmasi Kata Sandi", 'trim|required');
                 if ($this->form_validation->run() === TRUE) {
-                        $group_id = $this->input->post('group_id');
+                        // $group_id = $this->input->post('group_id');
+                        $group_id = 3;
 
 
                         $email = strtolower($this->input->post('email'));
@@ -80,8 +81,15 @@ class Auth extends Public_Controller
                                 'phone' => $this->input->post('phone'),
                                 // 'address' => $this->input->post('address')
                         );
+                        // var_dump($identity);
+                        // die;
                 }
                 if ($this->form_validation->run() === TRUE && ($user_id =  $this->ion_auth->register($identity, $password, $email, $additional_data, [$group_id], "phone"))) {
+                        $data = [
+                                'user_id' => $user_id,
+
+                        ];
+                        $this->store_model->create($data);
                         // check to see if we are creating the user
                         // redirect them back to the admin page
                         $this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->ion_auth->messages()));

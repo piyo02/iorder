@@ -161,4 +161,27 @@ class Product_model extends MY_Model
   {
     return count($this->products(null, null, $store_id)->result());
   }
+  public function popularity_product($store_id = null)
+  {
+    $this->db->select('product.*');
+    $this->db->select(" CONCAT( '" . base_url() . 'uploads/product/' . "' , " . $this->table . ".image )  as _image");
+    $this->db->select('category.name AS category_name');
+    $this->db->select('count(item.id) AS popularity');
+    $this->db->from('product');
+    $this->db->join(
+      'item',
+      'item.product_id = product.id',
+      'join'
+    );
+    $this->db->join(
+      'category',
+      'category.id = product.category_id',
+      'join'
+    );
+    if ($store_id)
+      $this->db->where('product.store_id', $store_id);
+    $this->db->group_by('product_id');
+    $this->db->order_by('popularity', 'desc');
+    return $this->db->get();
+  }
 }

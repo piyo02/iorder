@@ -15,9 +15,20 @@ class Order_services
   {
     $table["header"] = array(
       'name' => 'Pesanan',
-      'varian' => 'Varian Produk',
+      // 'varian' => 'Varian Produk',
       'quantity' => 'Banyak Pesanan',
       'cost' => 'Total Harga',
+    );
+    $table["number"] = $start_number;
+    return $table;
+  }
+  public function get_table_config_customer_no_action($_page, $start_number = 1)
+  {
+    $table["header"] = array(
+      'code' => 'Kode Pesanan',
+      'timestamp' => 'Tanggal',
+      'message' => 'Keterangan',
+      'status' => 'Status',
     );
     $table["number"] = $start_number;
     return $table;
@@ -67,22 +78,22 @@ class Order_services
         "title" => "Group",
         "data_name" => "name",
       ),
-      array(
-        "name" => 'X',
-        "type" => "modal_delete",
-        "modal_id" => "delete_",
-        "url" => site_url($_page . "delete/"),
-        "button_color" => "danger",
-        "param" => "id",
-        "form_data" => array(
-          "id" => array(
-            'type' => 'hidden',
-            'label' => "id",
-          ),
-        ),
-        "title" => "Group",
-        "data_name" => "name",
-      ),
+      // array(
+      //   "name" => 'X',
+      //   "type" => "modal_delete",
+      //   "modal_id" => "delete_",
+      //   "url" => site_url($_page . "delete/"),
+      //   "button_color" => "danger",
+      //   "param" => "id",
+      //   "form_data" => array(
+      //     "id" => array(
+      //       'type' => 'hidden',
+      //       'label' => "id",
+      //     ),
+      //   ),
+      //   "title" => "Group",
+      //   "data_name" => "code",
+      // ),
     );
     return $table;
   }

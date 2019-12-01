@@ -18,11 +18,12 @@ class Product extends Owner_Controller
 	}
 	public function index()
 	{
+		$store_id = $this->ion_auth->store_id();
 		$page = ($this->uri->segment(4)) ? ($this->uri->segment(4) -  1) : 0;
 		// echo $page; return;
 		//pagination parameter
 		$pagination['base_url'] = base_url($this->current_page) . '/index';
-		$pagination['total_records'] = $this->product_model->record_count();
+		$pagination['total_records'] = $this->product_model->count_product($store_id);
 		$pagination['limit_per_page'] = 10;
 		$pagination['start_record'] = $page * $pagination['limit_per_page'];
 		$pagination['uri_segment'] = 4;
@@ -30,7 +31,7 @@ class Product extends Owner_Controller
 		if ($pagination['total_records'] > 0) $this->data['pagination_links'] = $this->setPagination($pagination);
 		#################################################################3
 		$table = $this->services->get_table_config($this->current_page);
-		$table["rows"] = $this->product_model->products($pagination['start_record'], $pagination['limit_per_page'])->result();
+		$table["rows"] = $this->product_model->products($pagination['start_record'], $pagination['limit_per_page'], $store_id)->result();
 		$table = $this->load->view('templates/tables/plain_table_image', $table, true);
 		$this->data["contents"] = $table;
 		$add_menu = array(

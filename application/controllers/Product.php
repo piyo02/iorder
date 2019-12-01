@@ -7,13 +7,15 @@ class Product extends Customer_Controller
 	private $parent_page = 'product';
 	private $current_page = 'product/';
 	private $store_id = null;
-	private $user_id = null;
+	public $user_id = null;
 
 	public function __construct()
 	{
 		parent::__construct();
 		$this->load->library('services/Product_services');
 		$this->services = new Product_services;
+		$this->load->library('services/Order_services');
+		$this->order = new Order_services;
 		$this->load->model(array(
 			'group_model',
 			'product_model',
@@ -28,35 +30,6 @@ class Product extends Customer_Controller
 	}
 	public function index()
 	{
-		$table = $this->services->get_table_config($this->current_page);
-		$table["rows"] = $this->group_model->groups()->result();
-		$table = $this->load->view('templates/tables/plain_table', $table, true);
-		// $this->data["contents"] = $table;
-		$add_menu = array(
-			"name" => "Tambah Group",
-			"modal_id" => "add_group_",
-			"button_color" => "primary",
-			"url" => site_url($this->current_page . "add/"),
-			"form_data" => array(
-				"name" => array(
-					'type' => 'text',
-					'label' => "Nama Group",
-					'value' => "",
-				),
-				"description" => array(
-					'type' => 'textarea',
-					'label' => "Deskripsi",
-					'value' => "-",
-				),
-			),
-			'data' => NULL
-		);
-
-		$add_menu = $this->load->view('templates/actions/modal_form', $add_menu, true);
-
-		// $this->data["header_button"] =  $add_menu;
-		// return;
-		#################################################################3
 		$user_id = $this->user_id;
 		$store_id = $this->store_id;
 
@@ -66,7 +39,14 @@ class Product extends Customer_Controller
 		$this->data['user_id'] = $user_id;
 		$this->data['store'] = $store;
 		$this->data['categories'] = $this->category_model->categories(null, null, $store_id)->result();
+		$this->data['popular_product'] = $this->product_model->popularity_product($store_id)->result();
+
 		$this->data['products'] = $this->product_model->products(null, null, $store_id)->result();
+
+		if ($this->hold_order_model->order_by_user_id($user_id)->result() == NULL)
+			$this->data['qty_order'] = 0;
+		else
+			$this->data['qty_order'] = count($this->hold_order_model->order_by_user_id($user_id)->result());
 
 
 		$alert = $this->session->flashdata('alert');
@@ -87,7 +67,8 @@ class Product extends Customer_Controller
 
 		$table = $this->services->get_table_hold_order_config($this->current_page);
 		$table["rows"] = $this->hold_order_model->order_by_user_id($user_id)->result();
-
+		// var_dump($table["rows"]);
+		// die;
 		if ($table["rows"] == null)
 			redirect(site_url($this->current_page));
 
@@ -99,6 +80,10 @@ class Product extends Customer_Controller
 		$this->data['store'] = $store;
 		// $this->data['hold_order'] = $this->hold_order_model->order_by_user_id($user_id)->result();
 
+		if ($this->hold_order_model->order_by_user_id($user_id)->result() == NULL)
+			$this->data['qty_order'] = 0;
+		else
+			$this->data['qty_order'] = count($this->hold_order_model->order_by_user_id($user_id)->result());
 
 		$alert = $this->session->flashdata('alert');
 		$this->data["url"] = base_url('product/order');
@@ -109,6 +94,31 @@ class Product extends Customer_Controller
 		$this->data["header"] = "Group";
 		$this->data["sub_header"] = 'Klik Tombol Action Untuk Aksi Lebih Lanjut';
 		$this->render("customer/cart");
+	}
+	public function list_order()
+	{
+		$user_id = $this->user_id;
+		$store_id = $this->store_id;
+
+		$store = $this->store_model->store($store_id)->row();
+
+		if ($this->hold_order_model->order_by_user_id($user_id)->result() == NULL)
+			$this->data['qty_order'] = 0;
+		else
+			$this->data['qty_order'] = count($this->hold_order_model->order_by_user_id($user_id)->result());
+
+		$table = $this->order->get_table_config_customer_no_action($this->current_page);
+		$table["rows"] = $this->order_model->order_by_customer_id($user_id)->result();
+		$table["status"] = ['Pesanan baru', 'Sedang dibuat', 'Sudah diantar', 'Sudah dibayar'];
+		if ($table["rows"] == null)
+			redirect(site_url($this->current_page));
+
+		$table = $this->load->view('templates/tables/plain_table_status', $table, true);
+		$this->data["contents"] = $table;
+		$this->data['user_id'] = $user_id;
+		$this->data['store'] = $store;
+
+		$this->render("customer/order");
 	}
 	public function order()
 	{
@@ -140,7 +150,6 @@ class Product extends Customer_Controller
 			$product = $this->product_model->product($this->input->post('product_id_' . $i))->row();
 			$data_product = [
 				'qty' => $product->qty - $this->input->post('quantity_' . $i),
-				'name' => 'Nama Edit'
 			];
 			$param['id'] = $product->id;
 			$this->product_model->update($data_product, $param);
@@ -199,10 +208,10 @@ class Product extends Customer_Controller
 		redirect(site_url($this->current_page . 'detail_order'));
 	}
 
-	public function delete()
+	public function delete($id)
 	{
-		if (!($_POST)) redirect(site_url($this->current_page));
-		$data_param['id'] 	= $this->input->post('id');
+		// if (!($_POST)) redirect(site_url($this->current_page));
+		$data_param['id'] 	= $id;
 		if ($this->hold_order_model->delete($data_param)) {
 			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->hold_order_model->messages()));
 		} else {

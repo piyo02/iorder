@@ -23,7 +23,7 @@ class Generate extends Owner_Controller
 		$store_id = $this->ion_auth->store_id($user_id);
 
 		$table = $this->services->get_table_config_qrcode($this->current_page);
-		$table["rows"] = $this->customer_model->qrcode()->result();
+		$table["rows"] = $this->customer_model->qrcode(null, $store_id)->result();
 		$table = $this->load->view('templates/tables/plain_table_image', $table, true);
 		$this->data["contents"] = $table;
 		$add_menu = array(
@@ -50,11 +50,11 @@ class Generate extends Owner_Controller
 						4 => 'Pelanggan',
 					),
 				),
-				"url" => array(
-					'type' => 'text',
-					'label' => "URL",
-					'value' => "",
-				),
+				// "url" => array(
+				// 	'type' => 'text',
+				// 	'label' => "URL",
+				// 	'value' => "",
+				// ),
 			),
 			'data' => NULL
 		);
@@ -104,6 +104,7 @@ class Generate extends Owner_Controller
 			$id = $this->customer_model->create_qr($data);
 			if ($id) {
 				$params['data'] = 'http://www.localhost/iorder/auth/qrcode?id=' . $id;
+				// $params['data'] = base_url() . 'auth/qrcode?id=' . $id;
 				$params['level'] = 'H';
 				$params['size'] = 10;
 				$params['savename'] = FCPATH . $config['imagedir'] . $image_name;

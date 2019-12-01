@@ -49,15 +49,15 @@ class Product_services
     );
     $table["number"] = $start_number;
     $table["action"] = array(
-      array(
-        "name" => 'Tambah Varian',
-        "type" => "link",
-        "url" => site_url("owner/varian/index/"),
-        "button_color" => "primary",
-        "param" => "id",
-        "title" => "Group",
-        "data_name" => "name",
-      ),
+      // array(
+      //   "name" => 'Tambah Varian',
+      //   "type" => "link",
+      //   "url" => site_url("owner/varian/index/"),
+      //   "button_color" => "primary",
+      //   "param" => "id",
+      //   "title" => "Group",
+      //   "data_name" => "name",
+      // ),
       array(
         "name" => 'Edit',
         "type" => "modal_form_multipart",
@@ -205,21 +205,30 @@ class Product_services
     );
     $table["number"] = $start_number;
     $table["action"] = array(
+      // array(
+      //   "name" => 'X',
+      //   "type" => "modal_delete",
+      //   "modal_id" => "delete_",
+      //   "url" => site_url($_page . "delete/"),
+      //   "button_color" => "danger",
+      //   "param" => "id",
+      //   "form_data" => array(
+      //     "id" => array(
+      //       'type' => 'hidden',
+      //       'label' => "id",
+      //     ),
+      //   ),
+      //   "title" => "Group",
+      //   "data_name" => "product_name",
+      // ),
       array(
         "name" => 'X',
-        "type" => "modal_delete",
-        "modal_id" => "delete_",
+        "type" => "link",
         "url" => site_url($_page . "delete/"),
         "button_color" => "danger",
         "param" => "id",
-        "form_data" => array(
-          "id" => array(
-            'type' => 'hidden',
-            'label' => "id",
-          ),
-        ),
         "title" => "Group",
-        "data_name" => "product_name",
+        "data_name" => "name",
       ),
     );
     return $table;

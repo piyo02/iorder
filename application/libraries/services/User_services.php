@@ -74,6 +74,30 @@ class User_services
 				"param" => "id",
 			),
 			array(
+				"name" => 'Aktivasi',
+				"type" => "modal_form",
+				"modal_id" => "edit_",
+				"url" => site_url($_page . "activation/"),
+				"button_color" => "success",
+				"param" => "id",
+				"form_data" => array(
+					"id" => array(
+						'type' => 'hidden',
+						'label' => "id",
+					),
+					"active" => array(
+						'type' => 'select',
+						'label' => "Aktivasi",
+						'options' => array(
+							0 => 'Tidak Aktif',
+							1 => 'Aktif',
+						),
+					),
+				),
+				"title" => "Group",
+				"data_name" => "name",
+			),
+			array(
 				"name" => 'X',
 				"type" => "modal_delete",
 				"modal_id" => "delete_category_",

@@ -8,25 +8,36 @@
             <!-- <small>PRICING</small> -->
             <h3>Produk Terlaris</h3>
         </div>
-        <div class="card-deck">
-            <?php for ($i = 0; $i < 3; $i++) : ?>
-                <div class="card pricing popular">
-                    <div class="card-head">
-                        <small class="text-primary"><?= $products[$i]->category_name ?></small>
-                        <div>
-                            <img src="<?= $products[$i]->_image ?>" alt="<?= $products[$i]->name ?>" width="50%">
+        <?php if ($popular_product == NULL) : ?>
+            <div class="card-deck">
+                <h3>Tidak ada produk</h3>
+            </div>
+        <?php else : ?>
+            <div class="card-deck">
+                <?php
+                    if (count($popular_product) > 3)
+                        $limit = 3;
+                    else
+                        $limtt = count($popular_product);
+                    for ($i = 0; $i < $limit; $i++) : ?>
+                    <div class="card pricing popular">
+                        <div class="card-head">
+                            <small class="text-primary"><?= $popular_product[$i]->category_name ?></small>
+                            <div>
+                                <img src="<?= $popular_product[$i]->_image ?>" alt="<?= $popular_product[$i]->name ?>" width="50%">
+                            </div>
+                            <h3><?= $popular_product[$i]->name ?></h4>
                         </div>
-                        <h3><?= $products[$i]->name ?></h4>
+                        <ul class="list-group list-group-flush">
+                            <div class="list-group-item">Rp. <?= number_format($popular_product[$i]->price) ?></div>
+                        </ul>
+                        <div class="card-body">
+                            <button onclick="order(<?= $popular_product[$i]->id ?>)" class="btn btn-primary btn-lg btn-block">Pesan</button>
+                        </div>
                     </div>
-                    <ul class="list-group list-group-flush">
-                        <div class="list-group-item">Rp. <?= number_format($products[$i]->price) ?></div>
-                    </ul>
-                    <div class="card-body">
-                        <button onclick="order(<?= $products[$i]->id ?>)" class="btn btn-primary btn-lg btn-block">Pesan</button>
-                    </div>
-                </div>
-            <?php endfor; ?>
-        </div>
+                <?php endfor; ?>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 <!-- // end .section -->
@@ -78,11 +89,19 @@
     </div>
 </div>
 
-
+<script>
+    function add_order() {
+        var element = document.getElementById('qty_order');
+        console.log(parseInt(element.innerHTML) + 1);
+        element.innerHTML = parseInt(element.innerHTML) + 1;
+    }
+</script>
 <script>
     function order(id) {
         var product_id = id;
         var user_id = $('#user_id').val();
+        var qty = parseInt($('#qty_order').html());
+        console.log($('#qty_order').html(qty + 1))
         $.ajax({
             type: 'POST', //method
             url: '<?= base_url('product/add_hold_order') ?>', //action

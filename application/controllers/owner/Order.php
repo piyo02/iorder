@@ -19,9 +19,9 @@ class Order extends Owner_Controller
 	}
 	public function index()
 	{
-		$day = (int) date('d');
-		$month = (int) date('m');
-		$year = (int) date('Y');
+		$date = ($this->input->get('date')) ? $this->input->get('date') : date('d');
+		$month = ($this->input->get('month')) ? $this->input->get('month') : date('m');
+		$year = ($this->input->get('year')) ? $this->input->get('year') : date('Y');
 
 		$store_id = $this->ion_auth->store_id();
 		$page = ($this->uri->segment(4)) ? ($this->uri->segment(4) -  1) : 0;
@@ -35,24 +35,45 @@ class Order extends Owner_Controller
 		//set pagination
 		if ($pagination['total_records'] > 0) $this->data['pagination_links'] = $this->setPagination($pagination);
 		#################################################################3
-		$table = $this->services->get_table_config($this->current_page);
-		$table["rows"] = $this->order_model->orders($pagination['start_record'], $pagination['limit_per_page'], $store_id, $day, $month, $year)->result();
+
+		for ($i = 1; $i <= 31; $i++) {
+			$_date[$i] = $i;
+		}
+		for ($i = 0; $i <= 10; $i++) {
+			$_year[2019 + $i] = 2019 + $i;
+		}
+
+		$table = $this->services->get_table_config($this->current_page, $pagination['start_record'] + 1);
+		$table["rows"] = $this->order_model->orders($pagination['start_record'], $pagination['limit_per_page'], $store_id, $date, $month, $year)->result();
 		$table["status"] = ['Pesanan baru', 'Sedang dibuat', 'Sudah diantar', 'Sudah dibayar'];
 		$table = $this->load->view('templates/tables/plain_table_status', $table, true);
 		$this->data["contents"] = $table;
 		$form_filter = array(
 			"form_data" => array(
-				"name" => array(
+				"date" => array(
 					'type' => 'select',
-					'label' => "",
-					'options' => array()
+					'label' => "Tanggal",
+					'options' => $_date,
+					'selected' => $date,
+				),
+				"month" => array(
+					'type' => 'select',
+					'label' => "Bulan",
+					'options' => Util::MONTH,
+					'selected' => $month,
+				),
+				"year" => array(
+					'type' => 'select',
+					'label' => "Tahun",
+					'options' => $_year,
+					'selected' => $year,
 				),
 			)
 		);
 
-		$form_filter = $this->load->view('templates/form/plain_form_horizontal', $form_filter, true);
+		$form_filter = $this->load->view('templates/form/filter_order', $form_filter, true);
 
-		// $this->data["header_button"] =  $form_filter;
+		$this->data["header_button"] =  $form_filter;
 		// return;
 		#################################################################3
 		$alert = $this->session->flashdata('alert');

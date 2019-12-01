@@ -251,6 +251,26 @@ class Users extends Uadmin_Controller
 
 		$this->render("templates/contents/plain_content");
 	}
+	public function activation()
+	{
+		if (!($_POST)) redirect(site_url('uadmin'));
+
+		$user_id = $this->input->post('id');
+		$data['active'] = $this->input->post('active');
+
+		if (!$this->ion_auth->in_group(["admin", "uadmin"], $user_id)) {
+			$identity_mode = NULL;
+		}
+		if ($this->ion_auth->update($user_id, $data, $identity_mode)) {
+			// redirect them back to the uadmin page if uadmin, or to the base url if non uadmin
+			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::SUCCESS, $this->ion_auth->messages()));
+			redirect(site_url($this->current_page));
+		} else {
+			// redirect them back to the uadmin page if uadmin, or to the base url if non uadmin
+			$this->session->set_flashdata('alert', $this->alert->set_alert(Alert::DANGER, $this->ion_auth->errors()));
+			redirect(site_url($this->current_page) . "edit/" . $user_id);
+		}
+	}
 	public function delete()
 	{
 		if (!($_POST)) redirect(site_url('uadmin'));

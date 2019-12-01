@@ -98,14 +98,16 @@ class Order_model extends MY_Model
    * @return static
    * @author madukubah
    */
-  public function order($id = NULL)
+  public function order($id = NULL, $customer_id = null)
   {
     if (isset($id)) {
-      $this->where($this->table . '.id', $id);
+      $this->db->where($this->table . '.id', $id);
+      $this->db->limit(1);
     }
-
-    $this->limit(1);
-    $this->order_by($this->table . '.id', 'desc');
+    if (isset($customer_id)) {
+      $this->db->where($this->table . '.customer_id', $customer_id);
+    }
+    $this->db->order_by($this->table . '.id', 'desc');
 
     $this->orders();
 
@@ -142,7 +144,7 @@ class Order_model extends MY_Model
         ordered
     ');
     if (isset($limit)) {
-      $this->limit($limit);
+      $this->db->limit($limit);
     }
     if ($store_id) {
       $this->db->where($this->table . '.store_id', $store_id);
@@ -156,8 +158,23 @@ class Order_model extends MY_Model
     if ($year) {
       $this->db->where($this->table . '.year', $year);
     }
-    $this->offset($start);
-    $this->order_by($this->table . '.id', 'asc');
+    $this->db->offset($start);
+    $this->db->order_by($this->table . '.id', 'asc');
+    return $this->db->get();
+  }
+  public function order_by_customer_id($customer_id = NULL)
+  {
+    $this->db->select('*');
+    $this->db->from('
+      (
+        SELECT ordered.*, day( ordered.date ) AS day, month( ordered.date ) AS month, year( ordered.date ) AS year 
+        FROM ordered)
+        ordered
+    ');
+    if ($customer_id) {
+      $this->db->where($this->table . '.customer_id', $customer_id);
+    }
+    $this->db->order_by($this->table . '.id', 'asc');
     return $this->db->get();
   }
 }

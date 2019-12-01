@@ -496,7 +496,7 @@ class Ion_auth
 		if ($success) {
 			if ($this->ion_auth_model->update($user->id, $data)) {
 				$this->set_message('upload_successful');
-				if ($user->image != "default.jpg")
+				if ($user->image_file != "default.jpg")
 					if ($this->remove_photo($user->image_file)) { };
 
 
@@ -569,11 +569,11 @@ class Ion_auth
 				'label' => ('No Telepon'),
 				'rules' =>  'trim|required',
 			),
-			array(
-				'field' => 'group_id',
-				'label' => "User Group",
-				'rules' =>  'trim|required',
-			),
+			// array(
+			// 	'field' => 'group_id',
+			// 	'label' => "User Group",
+			// 	'rules' =>  'trim|required',
+			// ),
 		);
 
 		return $config;
@@ -674,6 +674,9 @@ class Ion_auth
 	}
 	public function store_id()
 	{
-		return $this->get_store_by_user_id()->id;
+		if (isset($this->get_store_by_user_id()->id))
+			return $this->get_store_by_user_id()->id;
+		else
+			redirect(site_url('owner/store'));
 	}
 }

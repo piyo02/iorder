@@ -156,7 +156,7 @@ class Customer_model extends MY_Model
     $this->order_by($this->table . '.id', 'asc');
     return $this->fetch_data();
   }
-  public function qrcode($id = null)
+  public function qrcode($id = null, $store_id = null)
   {
     $this->db->select('*');
     $this->db->select('
@@ -169,6 +169,8 @@ class Customer_model extends MY_Model
     $this->db->select(" CONCAT( '" . base_url() . 'uploads/qrcode/' . "' , " . "qrcode.image )  as _image");
     if ($id)
       $this->db->where('id', $id);
+    if ($store_id)
+      $this->db->where('store_id', $store_id);
     $this->db->order_by('qrcode.id', 'asc');
     return $this->db->get('qrcode');
   }
