@@ -39,7 +39,7 @@ class Product extends Owner_Controller
 			"modal_id" => "add_product_",
 			"button_color" => "primary",
 			"url" => site_url($this->current_page . "add/"),
-			"form_data" => $this->services->get_form_data(),
+			"form_data" => $this->services->get_form_data($store_id),
 			'data' => NULL
 		);
 
@@ -70,6 +70,7 @@ class Product extends Owner_Controller
 			$data['category_id'] = $this->input->post('category_id');
 			$data['price'] = $this->input->post('price');
 			$data['qty'] = $this->input->post('qty');
+			$data['store_id'] = $this->input->post('store_id');
 
 			$this->load->library('upload'); // Load librari upload
 			$config = $this->services->get_photo_upload_config($data['name']);

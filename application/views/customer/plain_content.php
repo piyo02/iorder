@@ -18,7 +18,7 @@
                     if (count($popular_product) > 3)
                         $limit = 3;
                     else
-                        $limtt = count($popular_product);
+                        $limit = count($popular_product);
                     for ($i = 0; $i < $limit; $i++) : ?>
                     <div class="card pricing popular">
                         <div class="card-head">
@@ -75,7 +75,7 @@
                                             <div class="list-group-item">Rp. <?= number_format($product->price) ?></div>
                                         </ul>
                                         <div class="card-body">
-                                            <button onclick="order(<?= $products[$i]->id ?>)" class="btn btn-primary btn-lg btn-block">Pesan</>
+                                            <button onclick="order(<?= $product->id ?>)" class="btn btn-primary btn-lg btn-block">Pesan</>
                                         </div>
                                     </div>
                             <?php

@@ -159,7 +159,7 @@ class Product_services
 
     return $config;
   }
-  public function get_form_data()
+  public function get_form_data($store_id = null)
   {
     $select = $this->select_category();
     $form_data = array(
@@ -186,6 +186,11 @@ class Product_services
       "image" => array(
         'type' => 'file',
         'label' => "Foto Produk",
+      ),
+      "store_id" => array(
+        'type' => 'hidden',
+        'label' => "id",
+        'value' => $store_id
       ),
       // "varian" => array(
       //   'type' => 'text',
